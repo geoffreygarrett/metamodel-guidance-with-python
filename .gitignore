@@ -29,5 +29,7 @@ build/
 .cproject
 .settings/
 .pydevproject
+.ipynb_checkpoints
+.ipynb_checkpoints/
 *.sublime-project
 *.sublime-workspace
