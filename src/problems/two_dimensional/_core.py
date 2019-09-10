@@ -7,7 +7,7 @@ from _performance import *
 class AttitudeTrajectoryProblem2D:
 
     def __init__(self, mission_geometry: MissionGeometry, spacecraft: Spacecraft, design_space: DesignSpaceBase,
-                 thrust_profile_f=lambda x: x + np.pi / 2,
+                 thrust_profile="tangential+",
                  thrust_profile_w_f=lambda x: 1,
                  case="default"):
 
@@ -18,11 +18,15 @@ class AttitudeTrajectoryProblem2D:
         self._omega = None
         self._theta = None
 
-        self._thrust_profile_f = thrust_profile_f
+        self._name = None
+        self._case_name = None
+
         self._thrust_profile_w_f = thrust_profile_w_f
 
         # Case handling.
         if case in ("default", "solar_eclipse_exit_sun_pointing"):
+
+            self._case_name = "Case1"
 
             # Design space init with time domain of satellite period.
             self.design_space.reference_time = self.mission_geometry.P_s
@@ -39,6 +43,20 @@ class AttitudeTrajectoryProblem2D:
 
         else:
             raise EnvironmentError("Input case not recognised.")
+
+    def get_name(self):
+        return
+
+    @property
+    def case_name(self):
+        """
+        Case1: Solar Eclipse Exit, Sun Pointing.
+            - t0: Exit of solar eclipse.
+            - Initial angular rate default: Mean motion of orbit.
+            - Initial pointing direction: Sun pointing.
+        :return:
+        """
+        return self._case_name
 
     # Core properties of the problem.
     @property
@@ -140,48 +158,57 @@ if __name__ == "__main__":
     from representation import NOmegaPointsScaleBasedPeriodic
 
     test_geometry = MissionGeometry()
-    test_design = NOmegaPointsScaleBasedPeriodic(int(test_geometry.P_s / 10), 3)
     test_spacecraft = Spacecraft()
+    test_design = NOmegaPointsScaleBasedPeriodic(int(test_geometry.P_s / 10), 3)
     test_problem = AttitudeTrajectoryProblem2D(test_geometry, test_spacecraft, test_design)
 
     x = [0.002, -0.002, 0.002, 0.1, 0.1, 0.1, 0.1]
     test_problem.design_space_evaluate(x)
 
-    print(test_problem.fitness(x))
 
-    a, o, t = test_problem.alpha, test_problem.omega, test_problem.theta
+    def test():
+        test_problem.fitness(x)
 
-    import matplotlib.pyplot as plt
 
-    plt.figure(figsize=(7, 10), dpi=300)
+    import timeit
 
-    plt.subplot(7, 1, 1)
-    plt.plot(test_problem.design_space.sampled_time_array, a)
+    print(timeit.timeit(test, number=100))
 
-    plt.subplot(7, 1, 2)
-    plt.plot(test_problem.design_space.sampled_time_array, o)
-
-    plt.subplot(7, 1, 3)
-    plt.plot(test_problem.design_space.sampled_time_array, t)
-
-    plt.subplot(7, 1, 4)
-    # print(test_problem.f_max_angular_rate()[0])
-    plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_max_angular_rate()[0])
-
-    plt.subplot(7, 1, 5)
-    # print(test_problem.f_max_angular_rate()[0])
-    plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_thrust_inefficiency()[0])
-
-    plt.subplot(7, 1, 6)
-    # print(test_problem.f_max_angular_rate()[0])
-    plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_star_sensor_exclusion()[0][0])
-
-    plt.subplot(7, 1, 7)
-    # print(test_problem.f_max_angular_rate()[0])
-    plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_star_sensor_exclusion()[0][2])
-    plt.plot(test_problem.design_space.sampled_time_array,
-             (np.arcsin(test_problem.mission_geometry.m_target_R / (
-                     test_problem.mission_geometry.m_target_R + test_problem.mission_geometry.spacecraft_h)) - 2 * np.sin(
-                 np.deg2rad(5))) * np.ones(test_problem.design_space.sampled_time_array.size))
-
-    plt.show()
+    import time
+    #
+    # a, o, t = test_problem.alpha, test_problem.omega, test_problem.theta
+    #
+    # import matplotlib.pyplot as plt
+    #
+    # plt.figure(figsize=(7, 10), dpi=300)
+    #
+    # plt.subplot(7, 1, 1)
+    # plt.plot(test_problem.design_space.sampled_time_array, a)
+    #
+    # plt.subplot(7, 1, 2)
+    # plt.plot(test_problem.design_space.sampled_time_array, o)
+    #
+    # plt.subplot(7, 1, 3)
+    # plt.plot(test_problem.design_space.sampled_time_array, t)
+    #
+    # plt.subplot(7, 1, 4)
+    # # print(test_problem.f_max_angular_rate()[0])
+    # plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_max_angular_rate()[0])
+    #
+    # plt.subplot(7, 1, 5)
+    # # print(test_problem.f_max_angular_rate()[0])
+    # plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_thrust_inefficiency()[0])
+    #
+    # plt.subplot(7, 1, 6)
+    # # print(test_problem.f_max_angular_rate()[0])
+    # plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_star_sensor_exclusion()[0][0])
+    #
+    # plt.subplot(7, 1, 7)
+    # # print(test_problem.f_max_angular_rate()[0])
+    # plt.plot(test_problem.design_space.sampled_time_array, test_problem.f_star_sensor_exclusion()[0][2])
+    # plt.plot(test_problem.design_space.sampled_time_array,
+    #          (np.arcsin(test_problem.mission_geometry.m_target_R / (
+    #                  test_problem.mission_geometry.m_target_R + test_problem.mission_geometry.spacecraft_h)) - 2 * np.sin(
+    #              np.deg2rad(5))) * np.ones(test_problem.design_space.sampled_time_array.size))
+    #
+    # plt.show()

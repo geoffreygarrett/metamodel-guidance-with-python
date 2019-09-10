@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.core.umath_tests import inner1d
+from numba import jit
 
 
-# Constraints
 def f_thrust_inefficiency(planned, actual, weight=1):
     _dot_product = inner1d(planned, actual)
     _aux = (1 - _dot_product) * weight
@@ -31,10 +31,10 @@ def f_max_angular_acceleration(alpha):
 
 def f_star_sensor_exclusion(sensor1_pointing_u, sensor2_pointing_u, sun_pointing_u, solar_eclipse_bool, body_u, R, h):
     _aux1 = inner1d(sensor1_pointing_u, sun_pointing_u) * (1 - solar_eclipse_bool) + (
-                np.arcsin(R / (R + h)) + inner1d(sensor1_pointing_u, body_u)) - 2
+            np.arcsin(R / (R + h)) + inner1d(sensor1_pointing_u, body_u)) - 2
     # + inner1d(sensor1_pointing_u, body_u)
     _aux2 = inner1d(sensor2_pointing_u, sun_pointing_u) * (1 - solar_eclipse_bool) + (
-                np.arcsin(R / (R + h)) + inner1d(sensor2_pointing_u, body_u)) - 2
+            np.arcsin(R / (R + h)) + inner1d(sensor2_pointing_u, body_u)) - 2
     # _aux2 = inner1d(sensor2_pointing_u, body_u)
     _aux_sum = _aux1 + _aux2
     _aux_max = np.maximum.accumulate(_aux_sum)

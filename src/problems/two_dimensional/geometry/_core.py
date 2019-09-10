@@ -228,6 +228,22 @@ class MissionGeometry:
         self._sample_time = t
 
     @property
+    def thrust_radial_positive_func_nu(self):
+        return lambda x: x,
+
+    @property
+    def thrust_radial_negative_func_nu(self):
+        return lambda x: -x,
+
+    @property
+    def thrust_tangential_positive_func_nu(self):
+        return lambda x: x + np.pi / 2,
+
+    @property
+    def thrust_tangential_negative_func_nu(self):
+        return lambda x: x - np.pi / 2,
+
+    @property
     def P_m(self) -> float:
         if self.m_update:
             self._P_m = orbital_period(self.m_target_a, MU_SUN)
