@@ -9,38 +9,77 @@ import torch
 import scipy.io as sio
 
 
-class TransformFX:
+# def compose():
 
-    # def __init__(self, idx=-1):
-    #     self._idx = idx
+
+class NullTransformFX:
+
+    @classmethod
+    def from_compose(cls, F=None, X=None):
 
     @property
     def x(self) -> bool:
-        pass
+        return False
 
     @property
     def f(self) -> bool:
-        pass
+        return False
 
     def inverse_f(self, f: np.ndarray) -> np.ndarray:
-        pass
+        return f
 
     def inverse_x(self, x: np.ndarray) -> np.ndarray:
-        pass
+        return x
 
     def transform_f(self, f: np.ndarray) -> np.ndarray:
-        pass
+        return f
 
     def transform_x(self, x: np.ndarray) -> np.ndarray:
-        pass
+        return x
+
+
+class SKLearnPreprocessor(NullTransformFX):
+
+    def __init__(self, preprocessor, indices=()):
+        super().__init__()
+        try:
+            assert hasattr(preprocessor, "fit_transform")
+            assert hasattr(preprocessor, "inverse_transform")
+            assert hasattr(preprocessor, "get_params")
+            assert hasattr(preprocessor, "set_params")
+        except AttributeError:
+            raise NotImplementedError(f"""
+            Either SKLearnPreprocessor has not implemented support for this preprocessor
+                or {preprocessor} is not part of the sklearn.preprocessing module.
+            """)
+        # try:
+        #     assert which in ("F", "X")
+        # except AttributeError:
+        #     raise KeyError(f"""
+        #     ({which}) is not a recognised argument. Either 'F' or 'X' must be used.
+        #     """)
+        # self._which = which
+        self._indices = indices
+
+    @property
+    def which(self):
+        return self._which
+
+    @property
+    def indices(self):
+        return self._indices
+
+        def
 
     # def params_to_mat(self, filename, root_dir):
-    #
-    # def params_to_npz(self, filename, root_dir):
-    #
-    # def params_to_csv(self, filename, root_dir):
-    #
-    # def params_to_npy(self, filename, root_dir):
+
+
+#
+# def params_to_npz(self, filename, root_dir):
+#
+# def params_to_csv(self, filename, root_dir):
+#
+# def params_to_npy(self, filename, root_dir):
 
 
 class DataSetFX(Dataset):
@@ -52,7 +91,7 @@ class DataSetFX(Dataset):
         _X_col = list(filter(lambda x: "x" in x, _df.columns))
         _F = _df.loc[:, _F_col].values
         _X = _df.loc[:, _X_col].values
-        return {"F": _F, "X": _F}
+        return {"F": _F, "X": _X}
 
     @staticmethod
     def fx_to_df(fx):
@@ -62,8 +101,8 @@ class DataSetFX(Dataset):
         _X_col = [f"x{i + 1}" for i in range(_X.shape[1])]
         return pd.DataFrame(data=np.concatenate((_F, _X), axis=1), columns=_F_col + _X_col)
 
-    def __init__(self, output_f: np.ndarray, input_x: np.ndarray, file_name=None, root_dir=None,
-                 transform: TransformFX = None):
+    def __init__(self, output: np.ndarray, input: np.ndarray, file_name=None, root_dir=None,
+                 transform: NullTransformFX = NullTransformFX, name=None):
         """
         :param output_f (numpy array):
         :param input_x (numpy array):
@@ -73,23 +112,23 @@ class DataSetFX(Dataset):
         :param transform_input (callable, optional): Optional transform to be applied to inputs.
         """
         try:
-            assert output_f.shape[0] == input_x.shape[0]
+            assert output.shape[0] == input.shape[0]
         except AssertionError:
             raise AttributeError("Number of input samples must equal output samples.")
 
         # Directory and file name for saving.
         self._root_dir = root_dir
-        self._file_name = file_name
+        self._name = name if name is not None else file_name.split(".")[0] if file_name is not None else None
 
         # Transform managing class.
         self._transform = transform
 
         # Tensor form storage.
-        self._output = torch.tensor(self._transform.transform_f(output_f))
-        self._input = torch.tensor(self._transform.transform_x(input_x))
+        self._output = torch.tensor(output) if transform is not None else torch.tensor(transform.transform_f(output))
+        self._input = torch.tensor(input) if transform is not None else torch.tensor(transform.transform_x(input))
 
     def __len__(self):
-        return len(self._output.shape[0])
+        return self._output.shape[0]
 
     def __getitem__(self, idx):
         return self._output[idx], self._input[idx]
@@ -97,34 +136,57 @@ class DataSetFX(Dataset):
     def __add__(self, other):
         assert self.input_size == other.input_size
         assert self.output_size == other.output_size
-        return DataSetFX(np.concatenate((self.output, other.output)), np.concatenate((self.input, other.input)))
+        _root_dir = self.root_dir
+        _transform = self.transform
+        try:
+            assert (self.transform == other.transform)
+        except AssertionError:
+            raise UserWarning("""
+            Root dir is not equivalent for L.H.S. DataSet and R.H.S. DataSet,
+                L.H.S. root dir is being used for resultant DataSet from __add__().
+            """)
+        try:
+            assert (self.root_dir == other.root_dir)
+        except AssertionError:
+            raise UserWarning("""
+            Transform class is not equivalent for L.H.S. DataSet and R.H.S. DataSet,
+                L.H.S. Transform class is being used for resultant DataSet from __add__().
+            """)
+        return DataSetFX(
+            output=np.concatenate((self.output, other.output)), input=np.concatenate((self.input, other.input)),
+            root_dir=_root_dir, transform=_transform
+        )
 
     @classmethod
     def from_csv(cls, file_name=None, root_dir=None, transform=None):
         _fx = cls.df_to_fx(pd.read_csv(os.path.join(root_dir, file_name)))
-        return cls(output_f=_fx["F"], input_x=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
+        return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
     def from_parquet(cls, file_name, root_dir=None, transform=None):
         _fx = cls.df_to_fx(pd.read_parquet(os.path.join(root_dir, file_name)))
-        return cls(output_f=_fx["F"], input_x=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
+        return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
     def from_npz(cls, file_name, root_dir=None, transform=None):
         _fx = np.load(os.path.join(root_dir, file_name))
-        return cls(output_f=_fx["F"], input_x=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
+        return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
     def from_mat(cls, file_name, root_dir=None, transform=None):
         _fx = sio.loadmat(os.path.join(root_dir, file_name))
-        return cls(output_f=_fx["F"], input_x=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
+        return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
+
+    @property
+    def transform(self):
+        return self._transform
 
     @property
     def output(self):
         """
         :return (numpy array): [N x dim_f] Array of output values.
         """
-        return self._output.numpy() if self._transform.f is None else self._transform.inverse_f(self._output.numpy())
+        return self._output.numpy() if self._transform.f is False else self._transform.inverse_f(self._output.numpy())
 
     @property
     def output_size(self):
@@ -135,18 +197,11 @@ class DataSetFX(Dataset):
         """
         :return (numpy array): [N x dim_x] Array of input values.
         """
-        return self._input.numpy() if self._transform.x is None else self._transform.inverse_x(self._input.numpy())
+        return self._input.numpy() if self._transform.x is False else self._transform.inverse_x(self._input.numpy())
 
     @property
     def input_size(self):
         return self._input.shape[1]
-
-    @property
-    def file_name(self):
-        """
-        :return (string): Current filename with extension included.
-        """
-        return self._file_name
 
     @property
     def root_dir(self):
@@ -160,7 +215,7 @@ class DataSetFX(Dataset):
         """
         :return (string): Name of DataSet derived from removing filename extension.
         """
-        return self._file_name.split(".")[0]
+        return self._name
 
     @property
     def fx(self):
@@ -193,3 +248,20 @@ class DataSetFX(Dataset):
         _df.name = self.name
         return _df
 
+    def train_test_split(self, test_size=0.2, random_state=42, shuffle=True):
+        input_train, input_test, output_train, output_test = model_selection.train_test_split(
+            self.input,
+            self.output,
+            random_state=random_state,
+            test_size=test_size,
+            shuffle=shuffle)
+        return (DataSetFX(output=output_train,
+                          input=input_train,
+                          transform=self.transform,
+                          name=f"{self.name}_tst{test_size}_rs{random_state}_s{shuffle}_train".replace(".", ""),
+                          root_dir=self.root_dir),
+                DataSetFX(output=output_test,
+                          input=input_test,
+                          transform=self.transform,
+                          name=f"{self.name}_tst{test_size}_rs{random_state}_s{shuffle}_test".replace(".", ""),
+                          root_dir=self.root_dir))
