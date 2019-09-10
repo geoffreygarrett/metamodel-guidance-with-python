@@ -14,8 +14,8 @@ import scipy.io as sio
 
 class NullTransformFX:
 
-    @classmethod
-    def from_compose(cls, F=None, X=None):
+    # @classmethod
+    # def from_compose(cls, F=None, X=None):
 
     @property
     def x(self) -> bool:
@@ -36,6 +36,9 @@ class NullTransformFX:
 
     def transform_x(self, x: np.ndarray) -> np.ndarray:
         return x
+
+
+null_transform = NullTransformFX()
 
 
 class SKLearnPreprocessor(NullTransformFX):
@@ -69,8 +72,6 @@ class SKLearnPreprocessor(NullTransformFX):
     def indices(self):
         return self._indices
 
-        def
-
     # def params_to_mat(self, filename, root_dir):
 
 
@@ -102,7 +103,7 @@ class DataSetFX(Dataset):
         return pd.DataFrame(data=np.concatenate((_F, _X), axis=1), columns=_F_col + _X_col)
 
     def __init__(self, output: np.ndarray, input: np.ndarray, file_name=None, root_dir=None,
-                 transform: NullTransformFX = NullTransformFX, name=None):
+                 transform: NullTransformFX = null_transform, name=None):
         """
         :param output_f (numpy array):
         :param input_x (numpy array):
@@ -158,22 +159,22 @@ class DataSetFX(Dataset):
         )
 
     @classmethod
-    def from_csv(cls, file_name=None, root_dir=None, transform=None):
+    def from_csv(cls, file_name=None, root_dir=None, transform=null_transform):
         _fx = cls.df_to_fx(pd.read_csv(os.path.join(root_dir, file_name)))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
-    def from_parquet(cls, file_name, root_dir=None, transform=None):
+    def from_parquet(cls, file_name, root_dir=None, transform=null_transform):
         _fx = cls.df_to_fx(pd.read_parquet(os.path.join(root_dir, file_name)))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
-    def from_npz(cls, file_name, root_dir=None, transform=None):
+    def from_npz(cls, file_name, root_dir=None, transform=null_transform):
         _fx = np.load(os.path.join(root_dir, file_name))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
-    def from_mat(cls, file_name, root_dir=None, transform=None):
+    def from_mat(cls, file_name, root_dir=None, transform=null_transform):
         _fx = sio.loadmat(os.path.join(root_dir, file_name))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 

@@ -2,8 +2,7 @@ from src.surrogate.dataset import DataSetFX, NullTransformFX
 
 ds1 = DataSetFX.from_parquet(
     file_name="dataSet_gridSampled_3.parquet",
-    root_dir="data",
-    transform=NullTransformFX()
+    root_dir="data"
 )
 
 ds1.to_mat(f"{ds1.name}.mat", root_dir=ds1.root_dir)
