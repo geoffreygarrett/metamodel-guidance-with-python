@@ -1,7 +1,7 @@
-from geometry import MissionGeometry
-from spacecraft import Spacecraft
-from representation import DesignSpaceBase
-from _performance import *
+from .geometry import MissionGeometry
+from .spacecraft import Spacecraft
+from .representation import DesignSpaceBase
+from ._performance import *
 
 
 class AttitudeTrajectoryProblem2D:
