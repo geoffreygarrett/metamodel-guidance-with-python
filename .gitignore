@@ -2,6 +2,7 @@
 venv
 lib/
 libs/
+data/
 CMakeFiles/
 _CPack_Packages/
 Makefile
