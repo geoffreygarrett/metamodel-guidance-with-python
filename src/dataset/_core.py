@@ -1,86 +1,13 @@
-from torch.utils.data import DataLoader, Dataset
-from scipy import io
-import pandas as pd
 import os
+from collections import OrderedDict
+
 import numpy as np
-from sklearn import model_selection
-import torch
-
+import pandas as pd
 import scipy.io as sio
-
-
-# def compose():
-
-
-class NullTransformFX:
-
-    # @classmethod
-    # def from_compose(cls, F=None, X=None):
-
-    @property
-    def x(self) -> bool:
-        return False
-
-    @property
-    def f(self) -> bool:
-        return False
-
-    def inverse_f(self, f: np.ndarray) -> np.ndarray:
-        return f
-
-    def inverse_x(self, x: np.ndarray) -> np.ndarray:
-        return x
-
-    def transform_f(self, f: np.ndarray) -> np.ndarray:
-        return f
-
-    def transform_x(self, x: np.ndarray) -> np.ndarray:
-        return x
-
-
-null_transform = NullTransformFX()
-
-
-class SKLearnPreprocessor(NullTransformFX):
-
-    def __init__(self, preprocessor, indices=()):
-        super().__init__()
-        try:
-            assert hasattr(preprocessor, "fit_transform")
-            assert hasattr(preprocessor, "inverse_transform")
-            assert hasattr(preprocessor, "get_params")
-            assert hasattr(preprocessor, "set_params")
-        except AttributeError:
-            raise NotImplementedError(f"""
-            Either SKLearnPreprocessor has not implemented support for this preprocessor
-                or {preprocessor} is not part of the sklearn.preprocessing module.
-            """)
-        # try:
-        #     assert which in ("F", "X")
-        # except AttributeError:
-        #     raise KeyError(f"""
-        #     ({which}) is not a recognised argument. Either 'F' or 'X' must be used.
-        #     """)
-        # self._which = which
-        self._indices = indices
-
-    @property
-    def which(self):
-        return self._which
-
-    @property
-    def indices(self):
-        return self._indices
-
-    # def params_to_mat(self, filename, root_dir):
-
-
-#
-# def params_to_npz(self, filename, root_dir):
-#
-# def params_to_csv(self, filename, root_dir):
-#
-# def params_to_npy(self, filename, root_dir):
+import torch
+from sklearn import model_selection
+from torch.utils.data import Dataset
+from .transform import TransformBase
 
 
 class DataSetFX(Dataset):
@@ -103,7 +30,7 @@ class DataSetFX(Dataset):
         return pd.DataFrame(data=np.concatenate((_F, _X), axis=1), columns=_F_col + _X_col)
 
     def __init__(self, output: np.ndarray, input: np.ndarray, file_name=None, root_dir=None,
-                 transform: NullTransformFX = null_transform, name=None):
+                 transform: TransformBase = None, name=None):
         """
         :param output_f (numpy array):
         :param input_x (numpy array):
@@ -125,14 +52,16 @@ class DataSetFX(Dataset):
         self._transform = transform
 
         # Tensor form storage.
-        self._output = torch.tensor(output) if transform is not None else torch.tensor(transform.transform_f(output))
-        self._input = torch.tensor(input) if transform is not None else torch.tensor(transform.transform_x(input))
+        _fx = self.df_to_fx(transform(self.fx_to_df({"F": output, "X": input}))) if transform else {"F": output,
+                                                                                                    "X": input}
+        self._output = torch.tensor(_fx["F"])
+        self._input = torch.tensor(_fx["X"])
 
     def __len__(self):
         return self._output.shape[0]
 
     def __getitem__(self, idx):
-        return self._output[idx], self._input[idx]
+        return self._input[idx], self._output[idx]
 
     def __add__(self, other):
         assert self.input_size == other.input_size
@@ -159,22 +88,22 @@ class DataSetFX(Dataset):
         )
 
     @classmethod
-    def from_csv(cls, file_name=None, root_dir=None, transform=null_transform):
+    def from_csv(cls, file_name=None, root_dir=None, transform=None):
         _fx = cls.df_to_fx(pd.read_csv(os.path.join(root_dir, file_name)))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
-    def from_parquet(cls, file_name, root_dir=None, transform=null_transform):
+    def from_parquet(cls, file_name, root_dir=None, transform=None):
         _fx = cls.df_to_fx(pd.read_parquet(os.path.join(root_dir, file_name)))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
-    def from_npz(cls, file_name, root_dir=None, transform=null_transform):
+    def from_npz(cls, file_name, root_dir=None, transform=None):
         _fx = np.load(os.path.join(root_dir, file_name))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
     @classmethod
-    def from_mat(cls, file_name, root_dir=None, transform=null_transform):
+    def from_mat(cls, file_name, root_dir=None, transform=None):
         _fx = sio.loadmat(os.path.join(root_dir, file_name))
         return cls(output=_fx["F"], input=_fx["X"], file_name=file_name, root_dir=root_dir, transform=transform)
 
@@ -182,12 +111,20 @@ class DataSetFX(Dataset):
     def transform(self):
         return self._transform
 
+    # @property
+    # def output_transform(self):
+    #     return self._output_transform
+    #
+    # @property
+    # def input_transform(self):
+    #     return self._input_transform
+
     @property
     def output(self):
         """
         :return (numpy array): [N x dim_f] Array of output values.
         """
-        return self._output.numpy() if self._transform.f is False else self._transform.inverse_f(self._output.numpy())
+        return self._output.numpy() # if self._transform.f is False else self._transform.inverse_f(self._output.numpy())
 
     @property
     def output_size(self):
@@ -198,7 +135,7 @@ class DataSetFX(Dataset):
         """
         :return (numpy array): [N x dim_x] Array of input values.
         """
-        return self._input.numpy() if self._transform.x is False else self._transform.inverse_x(self._input.numpy())
+        return self._input.numpy()#  if self._transform.x is False else self._transform.inverse_x(self._input.numpy())
 
     @property
     def input_size(self):
