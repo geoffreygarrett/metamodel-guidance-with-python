@@ -47,6 +47,7 @@ class BasicBlock(nn.Module):
         self.block = nn.Sequential(
             nn.Linear(input_size, output_size),
             self.activation,
+            nn.Linear(input_size, output_size),
             nn.BatchNorm1d(output_size)
         )
 

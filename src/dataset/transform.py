@@ -27,6 +27,7 @@ class TransformBase:
             self._target = target
             self._wrapper = wrapper
             self._kwargs = kwargs
+            self.__doc__ = self.__repr__()
 
         def __call__(self, data):
             return self.wrapper(self._object, self._target, **self._kwargs)(
@@ -35,7 +36,7 @@ class TransformBase:
                 data)
 
         def __repr__(self):
-            return f"{type(self._object).__name__}{str(inspect.signature(self._object.__init__))}"
+            return f"{str(self._object)}"
 
         @property
         def wrapper(self):
@@ -69,15 +70,25 @@ class TransformBase:
         return data
 
     def __repr__(self):
-        _max_name_len = max(map(lambda x: len(x), self._step_names))
+        _names = self._step_names
+        _documents = [str(getattr(self, name).__doc__) for name in self._step_names]
+        _targets = [str(getattr(self, name).target) for name in self._step_names]
+
+        _max_name_len = max(map(lambda x: len(x), _names))
+        _max_document = max(map(lambda x: len(str(x)), _documents))
+        _max_target_L = max(map(lambda x: len(str(x)), _targets))
+
         # print(_max_name_len)
         _header = []
         _pipeline_structure = [
-            f"T{idx}: ({name:{_max_name_len}}) {getattr(self, name).__doc__}" for idx, name in
-            enumerate(self._step_names)
+            f"Step {idx}: ({name:{_max_name_len}})  | Doc: {_documents[idx]:{_max_document}}  | Target(s): {_targets[idx]:{_max_target_L}}"
+            for
+            idx, name in
+            enumerate(_names)
         ]
-
-        return "\n".join(_pipeline_structure)
+        _header = '=' * max(map(lambda x: len(str(x)), _pipeline_structure))
+        _footer = _header
+        return "\n".join([_header] + _pipeline_structure + [_footer])
 
     @classmethod
     def from_ordered_dict(cls, ordered_dict: OrderedDict):
@@ -185,14 +196,17 @@ class TransformDataFrame(TransformBase):
     def to_npz(self, file_name, root_dir):
         pass  # TODO: Design convention for saving transform parameters for all transformers [PYTHON].
 
-    def add_feature(self, feature_name, operation, from_step="pre", target=None, documentation=None):
+    def add_feature(self, feature_name, operation, from_step="pre", target=None):
 
         # CATCHES AND CONSISTENCY.
         target = [target] if (type(target) is not list) and (target is not None) else target  # Case of a single target.
 
+        _d = operation
+
         operation = [operation] if type(operation) is not list else operation  # Case of single operation.
 
-        operation = map(lambda x: x if type(x) is tuple else (x, {}), operation)  # Case of function without kwargs.
+        operation = list(
+            map(lambda x: x if type(x) is tuple else (x, {}), operation))  # Case of function without kwargs.
 
         from_step = self._step_names[-1] if from_step is "post" else from_step  # Case of post-filtering.
 
@@ -207,7 +221,11 @@ class TransformDataFrame(TransformBase):
         # Set attribute to class for feature creation on DataFrame.
         _step = self.Step(type="feature", obj=operation, wrapper=self.feature_wrapper, target=target,
                           feature_name=feature_name)
-        _step.__doc__ = documentation
+
+        t = " -> ".join([str(func.__name__) + "(x" + str(kwargs) + ")" for func, kwargs in operation])
+        t = t.replace("{}", "").replace("{", ",**{")
+        _step.__doc__ = t
+
         setattr(self, _attribute_name, _step)
 
         # For the cast of pre_filtering.
@@ -218,7 +236,7 @@ class TransformDataFrame(TransformBase):
         else:
             self._step_names.insert(self._step_names.index(from_step) + 1, _attribute_name)
 
-    def add_filter(self, condition, to_step="pre", target=None, documentation=None):
+    def add_filter(self, condition, to_step="pre", target=None):
         _id = 1
 
         # CATCHES AND CONSISTENCY.
@@ -244,7 +262,7 @@ class TransformDataFrame(TransformBase):
 
         # Set attribute to class for lambda function corresponding to condition
         _filter_step = self.Step(type="filter", obj=condition, wrapper=self.filter_wrapper, target=target)
-        _filter_step.__doc__ = documentation
+        _filter_step.__doc__ = inspect.getsource(condition).lstrip().rstrip().replace("condition=", "").replace(",", "")
         setattr(self, _attribute_name, _filter_step)
 
         # For the cast of pre_filtering.
@@ -287,6 +305,10 @@ if __name__ == "__main__":
     # tx3 -> ["x4", "x5", "x6", "x7"]
     df.loc[:, "x4":"x7"] = tx3.fit_transform(df.loc[:, "x4":"x7"].values)
 
+    print(tx1.scale_)
+    print(tx1.min_)
+    print(tx2.scale_)
+
     # tf1 -> ["f1", "f2", "f3", "f4"]
     df.loc[:, "f1":"f4"] = tf1.fit_transform(df.loc[:, "f1":"f4"].values)
 
@@ -303,18 +325,17 @@ if __name__ == "__main__":
     transform.add_feature(from_step="tx1",
                           operation=[np.square, (np.sum, {"axis": 1}), np.sqrt],
                           target=["x1", "x2", "x3"],
-                          feature_name="x8",
-                          documentation="Magnitude of angular rate vector ||{x1,x2,x3}||.")
+                          feature_name="x8")
 
     transform.add_filter(to_step="pre",
                          condition=lambda x: x <= 0.05,
-                         target=["x4", "x7"],
-                         documentation="Filter out small relative values of x4 and x7.")
+                         target=["x4", "x7"])
 
     df_auto = transform(deepcopy(df_orig))
 
     print(transform)
-    print(transform._step_names)
+
+
 
 # print(manual)
 # print(df_auto)
