@@ -7,7 +7,7 @@ from ._performance import *
 class AttitudeTrajectoryProblem2D:
 
     def __init__(self, mission_geometry: MissionGeometry, spacecraft: Spacecraft, design_space: DesignSpaceBase,
-                 thrust_profile="tangential+",
+                 thrust_profile=lambda x: x + np.pi / 2,
                  thrust_profile_w_f=lambda x: 1,
                  case="default"):
 
@@ -22,6 +22,7 @@ class AttitudeTrajectoryProblem2D:
         self._case_name = None
 
         self._thrust_profile_w_f = thrust_profile_w_f
+        self._thrust_profile_f = thrust_profile
 
         # Case handling.
         if case in ("default", "solar_eclipse_exit_sun_pointing"):
