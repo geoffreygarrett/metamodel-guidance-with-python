@@ -35,6 +35,7 @@ class ResidualBlock(BaseResidualBlock):
         self.blocks = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             self.activation,
+            nn.Linear(hidden_size, hidden_size),
             nn.BatchNorm1d(hidden_size)
         )
 
@@ -47,7 +48,6 @@ class BasicBlock(nn.Module):
         self.block = nn.Sequential(
             nn.Linear(input_size, output_size),
             self.activation,
-            nn.Linear(input_size, output_size),
             nn.BatchNorm1d(output_size)
         )
 
