@@ -166,6 +166,7 @@ if __name__ == "__main__":
     x = [0.002, -0.002, 0.002, 0.1, 0.1, 0.1, 0.1]
     test_problem.design_space_evaluate(x)
 
+    # print(test_problem.fitness(x))
 
     def test():
         test_problem.fitness(x)
