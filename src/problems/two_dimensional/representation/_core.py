@@ -72,6 +72,110 @@ class OmegaBasedDesign(DesignSpaceBase):
         raise NotImplementedError("Not implemented in base class.")
 
 
+# class NOmegaPointsFixedTime(OmegaBasedDesign):
+#
+#     def __init__(self,
+#                  n_samples,
+#                  n_design_points,
+#                  max_abs_omega=np.deg2rad(1.5),
+#                  init_theta=None,
+#                  ):
+#         super().__init__(n_samples)
+#         self._max_abs_omega = max_abs_omega
+#         self._n_design_points = n_design_points
+#         self._init_theta = init_theta
+#
+#     def __call__(self, design_vector):
+#         theta0 = design_vector[-1] if self.design_theta else self.init_theta
+#         time_sc = design_vector[self.n_design_omega:][:-1] if self.design_theta else design_vector[self.n_design_omega:]
+#         omega_p = design_vector[:self.n_design_omega]
+#
+#         # https://en.wikipedia.org/wiki/N-sphere#CITEREFMarsaglia1972
+#         scale_time_vector = np.concatenate(([0], np.cumsum(time_sc)))
+#         scale_time_vector = scale_time_vector / np.max(scale_time_vector)
+#
+#         time_vector_end = (scale_time_vector * self.reference_time)
+#         time_vector_no_end = time_vector_end[:-1]  # Remove tf, as tf=t0
+#         sum_interior = integrate.cumtrapz(omega_p, time_vector_no_end[1:])[-1]
+#
+#         dt_i = time_vector_no_end[1]
+#         dt_f = self.reference_time - time_vector_no_end[-1]
+#
+#         delta_theta = (
+#                 - 2 * sum_interior
+#                 - omega_p[-1] * dt_f
+#                 - omega_p[0] * dt_i
+#                 + 4 * np.pi  # TODO: n.
+#         )
+#
+#         omega_i_f = 1 / (dt_i + dt_f) * delta_theta
+#         omega_p = np.concatenate(([omega_i_f], omega_p, [omega_i_f]))
+#
+#         omega_sampled = interpolate.interp1d(time_vector_end, omega_p)(self.sampled_time_array)
+#         theta_sampled = integrate.cumtrapz(omega_sampled, self.sampled_time_array, initial=0) + theta0
+#         alpha_sampled = np.diff(omega_sampled)
+#         alpha_sampled = np.concatenate((alpha_sampled, [alpha_sampled[-1]])) / (self.reference_time / self.n_samples)
+#         return alpha_sampled, omega_sampled, theta_sampled
+#
+#     @property
+#     def max_abs_omega(self):
+#         return self._max_abs_omega
+#
+#     @max_abs_omega.setter
+#     def max_abs_omega(self, x):
+#         self._max_abs_omega = x
+#
+#     @property
+#     def n_design_omega(self):
+#         return self._n_design_points
+
+
+# class NOmegaPointsFixedTimePeriodic(OmegaBasedDesign):
+#
+#     def __init__(self,
+#                  n_samples,
+#                  n_design_points,
+#                  max_abs_omega=np.deg2rad(1.5),
+#                  init_theta=None,
+#                  ):
+#         super().__init__(n_samples)
+#         self._max_abs_omega = max_abs_omega
+#         self._n_design_points = n_design_points
+#         self._init_theta = init_theta
+#
+#     def __call__(self, design_vector):
+#         theta0 = design_vector[-1] if self.design_theta else self.init_theta
+#         omega_p = design_vector[:self.n_design_omega]
+#         time_sc = design_vector[self.n_design_omega:][:-1] if self.design_theta else design_vector[self.n_design_omega:]
+#
+#         # https://en.wikipedia.org/wiki/N-sphere#CITEREFMarsaglia1972
+#         scale_time_vector = np.concatenate(([0], np.cumsum(time_sc)))
+#         scale_time_vector = scale_time_vector / np.max(scale_time_vector)
+#
+#         time_vector_end = (scale_time_vector * self.reference_time)
+#         time_vector_no_end = time_vector_end[:-1]  # Remove tf, as tf=t0
+#         sum_interior = integrate.cumtrapz(omega_p, time_vector_no_end[1:])[-1]
+#
+#         dt_i = time_vector_no_end[1]
+#         dt_f = self.reference_time - time_vector_no_end[-1]
+#
+#         delta_theta = (
+#                 - 2 * sum_interior
+#                 - omega_p[-1] * dt_f
+#                 - omega_p[0] * dt_i
+#                 + 4 * np.pi  # TODO: n.
+#         )
+#
+#         omega_i_f = 1 / (dt_i + dt_f) * delta_theta
+#         omega_p = np.concatenate(([omega_i_f], omega_p, [omega_i_f]))
+#
+#         omega_sampled = interpolate.interp1d(time_vector_end, omega_p)(self.sampled_time_array)
+#         theta_sampled = integrate.cumtrapz(omega_sampled, self.sampled_time_array, initial=0) + theta0
+#         alpha_sampled = np.diff(omega_sampled)
+#         alpha_sampled = np.concatenate((alpha_sampled, [alpha_sampled[-1]])) / (self.reference_time / self.n_samples)
+#         return alpha_sampled, omega_sampled, theta_sampled
+
+
 class NOmegaPointsScaleBasedPeriodic(OmegaBasedDesign):
     """
 
@@ -145,7 +249,7 @@ class NOmegaPointsScaleBasedPeriodic(OmegaBasedDesign):
     def n_design_scale(self):
         return self._n_design_points + 1
 
-    @property
+    # @property
     def get_bounds(self):
         _base = [
             [-self._max_abs_omega] * self.n_design_omega + [0.0 + self.min_t_scale] * self.n_design_scale,
@@ -153,7 +257,7 @@ class NOmegaPointsScaleBasedPeriodic(OmegaBasedDesign):
         ]
         _base[0] += [0] if self.design_theta else []
         _base[1] += [2 * np.pi] if self.design_theta else []
-        return _base
+        return tuple(_base)
 
 
 # class NOmegaPointsDomainBased(OmegaBasedDesign):

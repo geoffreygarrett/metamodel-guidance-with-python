@@ -38,6 +38,7 @@ class Spacecraft:
         return cos_a * np.cos(b) - sin_a * np.sin(b)
 
     def unit_vector_trajectory(self, angle):
+        # print(self._attitude_theta)
         return np.array([
             self.cos_a_plus_b(self._cos_theta, self._sin_theta, angle),
             self.sin_a_plus_b(self._cos_theta, self._sin_theta, angle)]).T

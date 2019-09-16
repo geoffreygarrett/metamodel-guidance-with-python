@@ -40,13 +40,16 @@ class AttitudeTrajectoryProblem2D:
 
             # Set spacecraft initial theta as pointing towards Sun.
             self.design_space.init["theta"] = np.arctan2(self.mission_geometry.R_solar_u[0][1],
-                                                         self.mission_geometry.R_solar_u[0][0])
+                                                         self.mission_geometry.R_solar_u[0][0]) - np.pi / 2
 
         else:
             raise EnvironmentError("Input case not recognised.")
 
     def get_name(self):
         return
+
+    def get_bounds(self):
+        return self.design_space.get_bounds()
 
     @property
     def case_name(self):
@@ -126,9 +129,14 @@ class AttitudeTrajectoryProblem2D:
         return [
             self.f_thrust_inefficiency()[1],
             self.f_power_from_available()[1],
+            self.f_star_sensor_exclusion()[1],
             self.f_max_angular_acceleration()[1],
             self.f_max_angular_rate()[1],
         ]
+
+    @property
+    def fitness_dim(self):
+        return len(self.fitness(self.design_space.get_bounds()[0]))
 
     @property
     def alpha(self):
@@ -165,6 +173,7 @@ if __name__ == "__main__":
 
     x = [0.002, -0.002, 0.002, 0.1, 0.1, 0.1, 0.1]
     test_problem.design_space_evaluate(x)
+
 
     # print(test_problem.fitness(x))
 
