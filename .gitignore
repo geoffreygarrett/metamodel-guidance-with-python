@@ -3,6 +3,7 @@ venv
 lib/
 libs/
 data/
+models/
 CMakeFiles/
 _CPack_Packages/
 Makefile
@@ -17,6 +18,8 @@ boost-numpy-eigen-*-Linux.tar.Z
 boost-numpy-eigen-*-Linux.tar.gz
 *.o
 *.so
+*.pyc
+__pycache__/
 
 # Common build output folders
 cmake-build-debug/
