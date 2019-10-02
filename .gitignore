@@ -1,6 +1,7 @@
 # Generated files
 venv
 lib/
+matlab/
 libs/
 data/
 models/

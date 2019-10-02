@@ -32,12 +32,12 @@ class ResidualBlock(BaseResidualBlock):
 
     def __init__(self, hidden_size, activation="relu"):
         super().__init__(hidden_size, hidden_size, activation=activation)
-        self.shortcut = nn.BatchNorm1d(hidden_size)
+        self.shortcut = nn.BatchNorm2d(hidden_size)
         self.blocks = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
+            nn.Conv2d(hidden_size, hidden_size, 1),
             self.activation,
-            nn.Linear(hidden_size, hidden_size),
-            nn.BatchNorm1d(hidden_size)
+            nn.Conv2d(hidden_size, hidden_size, 1),
+            nn.BatchNorm2d(hidden_size)
         )
 
 
@@ -47,14 +47,25 @@ class BasicBlock(nn.Module):
         super().__init__()
         self.activation = activation_dict[activation]
         self.block = nn.Sequential(
-            nn.Linear(input_size, output_size),
+            nn.Conv2d(input_size, output_size, 1),
             self.activation,
-            nn.BatchNorm1d(output_size)
+            nn.BatchNorm2d(output_size)
         )
 
     def forward(self, x):
         return self.block(x)
+    
+    
+class RegressionOutput(nn.Module):
 
+    def __init__(self, input_size, output_size):
+        super().__init__()
+        self.block = nn.Sequential(
+            nn.Conv2d(input_size, output_size, 1),
+        )
+
+    def forward(self, x):
+        return self.block(x)
 
 if __name__ == "__main__":
     test1 = ResidualBlock(5)
