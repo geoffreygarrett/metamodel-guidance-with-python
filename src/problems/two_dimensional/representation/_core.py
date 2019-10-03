@@ -190,7 +190,7 @@ class NOmegaPointsScaleBasedPeriodic(OmegaBasedDesign):
         super().__init__(n_samples)
         self._max_abs_omega = max_abs_omega
         self._n_design_points = n_design_points
-        self._init_theta = init_theta
+        self.init_theta = init_theta
         self._min_t_scale = 0.001
 
     def __call__(self, design_vector):

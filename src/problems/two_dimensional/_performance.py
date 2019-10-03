@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.core.umath_tests import inner1d
-from numba import jit
 from scipy import integrate
 
 

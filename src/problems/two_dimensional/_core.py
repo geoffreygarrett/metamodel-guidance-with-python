@@ -42,6 +42,7 @@ class AttitudeTrajectoryProblem2D:
             self.design_space.init["theta"] = np.arctan2(self.mission_geometry.R_solar_u[0][1],
                                                          self.mission_geometry.R_solar_u[0][0]) - np.pi / 2
 
+
         else:
             raise EnvironmentError("Input case not recognised.")
 
@@ -168,11 +169,14 @@ if __name__ == "__main__":
 
     test_geometry = MissionGeometry()
     test_spacecraft = Spacecraft()
+    print(int(test_geometry.P_s / 10))
     test_design = NOmegaPointsScaleBasedPeriodic(int(test_geometry.P_s / 10), 3)
     test_problem = AttitudeTrajectoryProblem2D(test_geometry, test_spacecraft, test_design)
-
+    print(test_problem.design_space.init["theta"])
     x = [0.002, -0.002, 0.002, 0.1, 0.1, 0.1, 0.1]
     test_problem.design_space_evaluate(x)
+
+    print(test_geometry.P_s)
 
 
     # print(test_problem.fitness(x))
