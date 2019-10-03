@@ -1,5 +1,4 @@
 import numpy as np
-from numba import jit
 
 
 def grid_sample(bounds, n_sample_dim, flatten=True, edges=True):
