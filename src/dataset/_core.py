@@ -36,7 +36,7 @@ class DataSetFX(Dataset):
         return pd.DataFrame(data=np.concatenate((_F, _X), axis=1), columns=_F_col + _X_col)
 
     def __init__(self, output: np.ndarray, input: np.ndarray, file_name=None, root_dir=None,
-                 transform: TransformBase = None, name=None):
+                 transform: TransformBase = None, name=None, matlab_onnx=False):
         """
         :param output_f (numpy array):
         :param input_x (numpy array):
@@ -60,8 +60,12 @@ class DataSetFX(Dataset):
         # Tensor form storage.
         _fx = self.df_to_fx(transform(self.fx_to_df({"F": output, "X": input}))) if transform else {"F": output,
                                                                                                     "X": input}
-        self._output = torch.tensor(_fx["F"]).view(_fx["F"].shape[0], _fx["F"].shape[1], 1, 1)
-        self._input = torch.tensor(_fx["X"]).view(_fx["X"].shape[0], _fx["X"].shape[1], 1, 1)
+        if matlab_onnx:
+            self._output = torch.tensor(_fx["F"]).view(_fx["F"].shape[0], _fx["F"].shape[1], 1, 1)
+            self._input = torch.tensor(_fx["X"]).view(_fx["X"].shape[0], _fx["X"].shape[1], 1, 1)
+        else:
+            self._output = torch.tensor(_fx["F"]).view(_fx["F"].shape[0], _fx["F"].shape[1])  # , 1, 1)
+            self._input = torch.tensor(_fx["X"]).view(_fx["X"].shape[0], _fx["X"].shape[1])  # , 1, 1)
 
     def __len__(self):
         return self._output.shape[0]

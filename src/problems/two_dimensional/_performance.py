@@ -31,16 +31,19 @@ def f_max_angular_acceleration(alpha):
 
 
 def f_star_sensor_exclusion(sensor1_pointing_u, sensor2_pointing_u, sun_pointing_u, solar_eclipse_bool, body_u, R, h):
-    _star_aux_1 = np.arccos(inner1d(sensor1_pointing_u, sun_pointing_u))
-    _planet_aux_1 = np.arccos(inner1d(sensor1_pointing_u, body_u)) - np.arcsin(R / (R + h))
+    _cos_star_aux_1 = np.clip(inner1d(sensor1_pointing_u, sun_pointing_u), -1, 1)
+    _star_aux_1 = np.arccos(_cos_star_aux_1)
+    _cos_planet_aux_1 = np.clip(inner1d(sensor1_pointing_u, body_u), -1, 1)
+    _planet_aux_1 = np.arccos(_cos_planet_aux_1) - np.arcsin(R / (R + h))
     _aux1 = - np.amin(np.array([
         [_star_aux_1],
         [_planet_aux_1]
     ]),
         axis=0)[0]
-
-    _star_aux_2 = np.arccos(inner1d(sensor2_pointing_u, sun_pointing_u))
-    _planet_aux_2 = np.arccos(inner1d(sensor2_pointing_u, body_u)) - np.arcsin(R / (R + h))
+    _cos_star_aux_2 = np.clip(inner1d(sensor2_pointing_u, sun_pointing_u), -1, 1)
+    _star_aux_2 = np.arccos(_cos_star_aux_2)
+    _cos_planet_aux_2 = np.clip(inner1d(sensor2_pointing_u, body_u), -1, 1)
+    _planet_aux_2 = np.arccos(_cos_planet_aux_2) - np.arcsin(R / (R + h))
     _aux2 = - np.amin(np.array([
         [_star_aux_2],
         [_planet_aux_2]
