@@ -97,7 +97,7 @@ import plotly.io as pio
 from IPython.display import Image
 
 
-def plotly3Dsurf(x, y, z, name=None, show_scatter=False, static=False):
+def plotly3Dsurf(x, y, z, name=None, show_scatter=False, renderer=None, save=False):
     data = []
     data.append(go.Surface(x=x, y=y, z=z, colorscale='inferno'))
     if show_scatter:
@@ -127,15 +127,17 @@ def plotly3Dsurf(x, y, z, name=None, show_scatter=False, static=False):
 
     fig.update_layout(scene_aspectmode='cube')
 
-    if static:
+    if renderer is not None:
         # Image(pio.to_image(fig, format='png'))
-        fig.show(renderer="png")
+        fig.show(renderer=renderer)
 
     else:
         fig.show()
-    # if name is not None:
-    #     plt.savefig(f'notebooks/graphics/{name}.pdf')
+    if save:
+        fig.write_image(f"notebooks/graphics/{name}.pdf")
+        # plt.savefig(f'notebooks/graphics/{name}.pdf')
     # plt.show()
+
 
 
 def tri_indices(simplices):
@@ -202,7 +204,7 @@ def plotly_trisurf(x, y, z, simplices, colormap=cm.RdBu, plot_edges=None):
         return [triangles, lines]
 
 
-def plotly3Dtrisurf(x, y, z, name=None, show_scatter=False, static=False):
+def plotly3Dtrisurf(x, y, z, name=None, show_scatter=False, renderer=None, save=False):
     x = x.flatten()
     y = y.flatten()
     z = z.flatten()
@@ -242,18 +244,79 @@ def plotly3Dtrisurf(x, y, z, name=None, show_scatter=False, static=False):
 
     fig.update_layout(scene_aspectmode='cube')
 
-    if static:
+    if renderer is not None:
         # Image(pio.to_image(fig, format='png'))
-        fig.show(renderer="png")
+        fig.show(renderer=renderer)
 
     else:
         fig.show()
-    # if name is not None:
-    #     plt.savefig(f'notebooks/graphics/{name}.pdf')
+    if save:
+        fig.write_image(f"notebooks/graphics/{name}.pdf")
+        # plt.savefig(f'notebooks/graphics/{name}.pdf')
     # plt.show()
 
 
-def plotly3Dscatter(x, y, z, name=None, lim=None):
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+from .uninformed import grid_sample_domain
+
+
+def plotly3Dsurface_F2D_7by3(F2D, N=100, name=None, renderer=None, save=False, figsize=None):
+    fig = make_subplots(rows=7, cols=3, specs=
+    [[{'type': 'surface'}] * 3] * 7)
+
+    todo = np.meshgrid(np.arange(1, 4), np.arange(1, 8))
+    todo_ = [todo_i.flatten() for todo_i in todo]
+    todo_ = np.array(todo_).T
+
+    for idx, F in enumerate(F2D):
+        i, j = int(todo_[idx][0]), int(todo_[idx][1])
+        # print(F)
+        # print(idx)
+
+        f1_grid = grid_sample_domain(F.bounds, [N, N], flatten=False)
+        x, y = f1_grid[0], f1_grid[1]
+        fig.add_trace(
+            go.Surface(x=x, y=y, z=F(x, y), colorscale='inferno', showscale=False),
+            row=j, col=i
+        )
+
+    camera = dict(
+        # up=dict(x=0, y=0, z=-10),
+        center=dict(x=0, y=0, z=-0.20),
+        # eye=dict(x=1.25, y=1.25, z=1.25)
+    )
+
+    fig.update_layout(title=name, autosize=False,
+                      width=700, height=2000,
+                      margin=dict(l=0, r=0, b=0, t=0),
+                      scene_camera=camera,
+                      scene_aspectmode='cube')
+
+    fig.update_layout(scene_aspectmode='cube')
+    fig.update_xaxes(showticklabels=False)
+
+    fig.update_yaxes(showticklabels=False)
+    fig.update_zaxes(showticklabels=False)
+
+    if renderer is not None:
+
+        if figsize:
+            rend = pio.renderers[str(renderer)]
+            rend.width = figsize[0]
+            rend.height = figsize[1]
+
+        # pio.renderer.default = "png"
+
+        fig.show(renderer=renderer)
+
+    else:
+        fig.show()
+    if save:
+        fig.write_image(f"notebooks/graphics/{name}.pdf")
+
+
+def plotly3Dscatter(x, y, z, name=None, lim=None, renderer=None, save=False):
     fig = go.Figure(data=[go.Scatter3d(x=x,
                                        y=y,
                                        z=z,
@@ -287,10 +350,13 @@ def plotly3Dscatter(x, y, z, name=None, lim=None):
                       margin=dict(l=65, r=50, b=65, t=90),
                       scene_camera=camera)
 
-    fig.show()
-    # if name is not None:
-    #     plt.savefig(f'notebooks/graphics/{name}.pdf')
-    # plt.show()
+    if renderer is not None:
+        fig.show(renderer=renderer)
+
+    else:
+        fig.show()
+    if save:
+        fig.write_image(f"notebooks/graphics/{name}.pdf")
 
 
 def plot3Dsurf2(x, y, f, name=None):
