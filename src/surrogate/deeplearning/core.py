@@ -2,6 +2,9 @@ import pandas as pd
 import torch
 import sys
 import os
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import display, clear_output
 
 from .util import save_checkpoint
 from .util import load_checkpoint
@@ -252,14 +255,43 @@ class Trainer2:
         return torch.utils.data.DataLoader(dataset=validation_dataset,
                                            batch_size=self._batch_size,
                                            shuffle=True)
+    
+    @staticmethod
+    def _plot_jupyter(train_log, rt_ax, rt_fig):
+        epoch_series = train_log["epoch"]
+        train_loss_series = train_log["train_loss"]
+        test_loss_series = train_log["test_loss"]
+        validation_loss_series = train_log["validation_loss"]
 
+        rt_ax[0].cla()
+        rt_ax[1].cla()
+        
+        rt_ax[0].plot(epoch_series, train_loss_series, label="Train loss")
+        rt_ax[0].plot(epoch_series, test_loss_series, label="Test loss")
+        rt_ax[0].plot(epoch_series, validation_loss_series, label="Validation loss")
+        rt_ax[0].legend()
+        
+        rt_ax[1].plot(epoch_series[-500:], train_loss_series[-500:].rolling(100).mean() , label="Train loss")
+        rt_ax[1].plot(epoch_series[-500:], test_loss_series[-500:].rolling(100).mean() , label="Test loss (M10)")
+        rt_ax[1].plot(epoch_series[-500:], validation_loss_series[-500:].rolling(100).mean() , label="Validation loss (M10)")
+        rt_ax[1].legend()
+        
+        display(rt_fig)
+        clear_output(wait=True)
+        plt.pause(1e-12)
+        
+        
     def _train(self, verbose,
                early_stopping=None,
                save_each_epoch=True,
                save_final_model=True,
-               plot_jupyter=False):
+               plot_jupyter=None):
+        
+        if plot_jupyter:
 
-        # ██████╗  █████╗ ████████╗ █████╗     ██╗      ██████╗  █████╗ ██████╗ ███████╗██████╗ ███████╗
+            rt_fig, rt_ax = plt.subplots(2, 1, figsize=(4, 3), dpi=300)
+
+            # ██████╗  █████╗ ████████╗ █████╗     ██╗      ██████╗  █████╗ ██████╗ ███████╗██████╗ ███████╗
         # ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗    ██║     ██╔═══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝
         # ██║  ██║███████║   ██║   ███████║    ██║     ██║   ██║███████║██║  ██║█████╗  ██████╔╝███████╗
         # ██║  ██║██╔══██║   ██║   ██╔══██║    ██║     ██║   ██║██╔══██║██║  ██║██╔══╝  ██╔══██╗╚════██║
@@ -352,7 +384,7 @@ class Trainer2:
                                                                         "train_loss": [train_loss_item],
                                                                         "test_loss": [test_loss_item],
                                                                         "validation_loss": [validation_loss_item],
-                                                                        "learning_rate": [learning_rate]})])
+                                                                        "learning_rate": [learning_rate]})], sort=False)
 
             # Use scheduler if present.
             if self._scheduler:
@@ -371,11 +403,17 @@ class Trainer2:
             if save_each_epoch:
                 self.save_general_epoch_checkpoint()
 
+            if plot_jupyter:
+                if self._epoch % plot_jupyter == 0:
+                    self._plot_jupyter(self._train_log, rt_ax, rt_fig)
+                else:
+                    pass
+
             # Early stopping if provided.
             if early_stopping is not None:
                 # early_stopping needs the validation loss to check if it has decreased,
                 # and if it has, it will make a checkpoint of the current model
-                early_stopping(epoch_validation_loss, self._model)
+                early_stopping(validation_loss_item, self._model)
 
                 if early_stopping.early_stop:
                     print("Early stopping...")
@@ -385,13 +423,16 @@ class Trainer2:
         if save_final_model:
             self.save_final_model()
 
+        if plot_jupyter:
+            self._plot_jupyter(self._train_log, rt_ax, rt_fig)
+
         return self._train_log
 
     def train(self, verbose=False,
-               early_stopping=None,
-               save_each_epoch=True,
-               save_final_model=True,
-               plot_jupyter=False):
+              early_stopping=None,
+              save_each_epoch=True,
+              save_final_model=True,
+              plot_jupyter=False):
         try:
             return self._train(verbose,
                                early_stopping,
@@ -459,4 +500,3 @@ class Trainer2:
 
         if 'model_pickle' in type:
             save_entire_model(self._model, self._path)
-

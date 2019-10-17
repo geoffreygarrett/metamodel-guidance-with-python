@@ -6,7 +6,11 @@ activation_dict = nn.ModuleDict([
     ['leaky_relu', nn.LeakyReLU(negative_slope=0.01, inplace=True)],
     ['selu', nn.SELU(inplace=True)],
     ['none', nn.Identity()],
-    ['sigmoid', nn.Sigmoid()]
+    ['sigmoid', nn.Sigmoid()],
+    ['relu6', torch.nn.ReLU6()],
+    ['softsign', torch.nn.Softsign()],
+    ['tanh', torch.nn.Tanh()],
+    ['tanshrink',torch.nn.Tanhshrink()],
 ])
 
 

@@ -79,7 +79,7 @@ def load_checkpoint(trainer, PATH):
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
 
-    def __init__(self, patience=7, verbose=False, delta=0):
+    def __init__(self, patience=7, verbose=False, abs_delta=None, rel_delta=None):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -95,18 +95,22 @@ class EarlyStopping:
         self.best_score = None
         self.early_stop = False
         self.val_loss_min = np.Inf
-        self.delta = delta
+        self.abs_delta = abs_delta
+        self.rel_delta = rel_delta
 
     def __call__(self, val_loss, model):
 
-        score = val_loss
-
+        score = -val_loss
+        delta = np.max([
+            np.abs(val_loss * self.best_score) if self.abs_delta else 0.0,
+            self.abs_delta if self.abs_delta else 0.0,
+        ])
         if self.best_score is None:
             self.best_score = score
             # self.save_checkpoint(val_loss, model)
-        elif score < self.best_score - self.delta:
+        elif score < self.best_score - delta:
             self.counter += 1
-            print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            print(f'EarlyStopping counter: {self.counter} out of {self.patience}') if self.verbose else None
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
