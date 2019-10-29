@@ -1,2 +1,0 @@
-  rtwdemo_rsim_i.c
-
