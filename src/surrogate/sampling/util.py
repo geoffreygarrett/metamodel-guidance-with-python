@@ -139,7 +139,6 @@ def plotly3Dsurf(x, y, z, name=None, show_scatter=False, renderer=None, save=Fal
     # plt.show()
 
 
-
 def tri_indices(simplices):
     # simplices is a numpy array defining the simplices of the triangularization
     # returns the lists of indices i, j, k
@@ -262,6 +261,11 @@ from .uninformed import grid_sample_domain
 
 
 def plotly3Dsurface_F2D_7by3(F2D, N=100, name=None, renderer=None, save=False, figsize=None):
+    camera = dict(
+        # up=dict(x=0, y=0, z=-10),
+        center=dict(x=0, y=0, z=-0.20),
+        # eye=dict(x=1.25, y=1.25, z=1.25)
+    )
     fig = make_subplots(rows=7, cols=3, specs=
     [[{'type': 'surface'}] * 3] * 7)
 
@@ -281,23 +285,35 @@ def plotly3Dsurface_F2D_7by3(F2D, N=100, name=None, renderer=None, save=False, f
             row=j, col=i
         )
 
+        fig.update_layout(title=name, autosize=False,
+                          width=700, height=2000,
+                          margin=dict(l=0, r=0, b=0, t=0),
+                          scene_camera=camera,
+                          scene_aspectmode='cube',
+                          scene=dict(
+                              xaxis=dict(showticklabels=False),
+                              yaxis=dict(showticklabels=False),
+                              zaxis=dict(showticklabels=False)
+                          ))
+
     camera = dict(
         # up=dict(x=0, y=0, z=-10),
         center=dict(x=0, y=0, z=-0.20),
         # eye=dict(x=1.25, y=1.25, z=1.25)
     )
 
-    fig.update_layout(title=name, autosize=False,
-                      width=700, height=2000,
-                      margin=dict(l=0, r=0, b=0, t=0),
-                      scene_camera=camera,
-                      scene_aspectmode='cube')
+    # fig.update_layout(title=name, autosize=False,
+    #                   width=700, height=2000,
+    #                   margin=dict(l=0, r=0, b=0, t=0),
+    #                   scene_camera=camera,
+    #                   scene_aspectmode='cube',
+    #                   scene=dict(
+    #                       xaxis=dict(showticklabels=False),
+    #                       yaxis=dict(showticklabels=False),
+    #                       zaxis=dict(showticklabels=False)
+    #                   ))
 
     fig.update_layout(scene_aspectmode='cube')
-    fig.update_xaxes(showticklabels=False)
-
-    fig.update_yaxes(showticklabels=False)
-    fig.update_zaxes(showticklabels=False)
 
     if renderer is not None:
 

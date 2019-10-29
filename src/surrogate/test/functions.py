@@ -86,16 +86,46 @@ def classproperty(func):
 
 class TestFunction:
 
+    @staticmethod
+    def _catch_n(n, less_than=1):
+        try:
+            assert n >= less_than
+        except AssertionError:
+            raise AssertionError(f"n must be >= than 1, but is ={n}")
+
+    @property
+    def norm_domain(self):
+        return self._norm_domain
+
+    @norm_domain.setter
+    def norm_domain(self, x):
+        self._norm_domain = x
+
+    def normed_call(self, *args):
+        _args = [args[i] * (self._bounds[1][i] - self._bounds[0][i]) + self._bounds[0][i] for i in range(len(args))]
+        return self._f(*_args)
+
     def __init__(self):
+        self._norm_domain = True
         self._bounds = None
         self._optimum = None
+        self._f = None
+        self._n = None
+        self._str = None
 
     def __call__(self, *args):
-        raise NotImplementedError("Not implemented in base class.")
+        return self._f(*args) if not self.norm_domain else self.normed_call(*args)
+
+    def __str__(self):
+        return self._str
 
     @property
     def bounds(self):
         return self._bounds
+
+    @property
+    def norm_bounds(self):
+        return np.array([[0] * 2, [1] * 2]) if self._n is None else np.array([[0] * self._n, [1] * self._n])
 
     @property
     def optimums(self):
@@ -109,20 +139,13 @@ class Rastrigin(TestFunction):
     """
 
     def __init__(self, n):
-        try:
-            assert n >= 1
-        except AssertionError:
-            raise AssertionError(f"n must be >= than 1, but is ={n}")
+        self._catch_n(n)
         super().__init__()
+        self._str = f"Rastrigin function [{n}D]"
         self._bounds = np.array([[-5.12] * n, [5.12] * n])
         self._optimum = [([0] * n, 0.0)]
         self._n = n
-
-    def __str__(self):
-        return f"Rastrigin function {self._n}D"
-
-    def __call__(cls, *x):
-        return 10 * len(x) + np.sum([x_i ** 2 - 10 * np.cos(2 * np.pi * x_i) for x_i in x], axis=0)
+        self._f = lambda *x: 10 * len(x) + np.sum([x_i ** 2 - 10 * np.cos(2 * np.pi * x_i) for x_i in x], axis=0)
 
 
 class Ackley(TestFunction):
@@ -132,84 +155,61 @@ class Ackley(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Ackley function [2D]"
         self._bounds = np.array([
             [-5.0, -5.0],
             [+5.0, +5.0]])
         self._optimum = [([0.0, 0.0], 0.0)]
-
-    def __call__(self, x, y):
-        a1 = -20 * np.exp(-0.2 * np.sqrt(0.5 * (x ** 2 + y ** 2)))
-        a2 = -np.exp(0.5 * (np.cos(2 * np.pi * x) + np.cos(2 * np.pi * y)))
-        return a1 + a2 + np.e + 20
-
-    def __str__(self):
-        return "Ackley function 2D"
+        self._f = lambda x, y: -20 * np.exp(-0.2 * np.sqrt(0.5 * (x ** 2 + y ** 2))) - np.exp(
+            0.5 * (np.cos(2 * np.pi * x) + np.cos(2 * np.pi * y))) + np.e + 20
 
 
 class Sphere(TestFunction):
 
     def __init__(self, n):
-        try:
-            assert n >= 1
-        except AssertionError:
-            raise AssertionError(f"n must be >= than 1, but is ={n}")
+        self._catch_n(n)
         super().__init__()
+        self._str = f"Sphere function [{n}D]"
         self._bounds = np.array([
             [-1e8] * n,
             [+1e8] * n])
         self._optimum = [([0.0] * n, 0.0)]
         self._n = n
-
-    def __call__(self, *x):
-        return np.sum([x_i ** 2 for x_i in x], axis=0)
-
-    def __str__(self):
-        return f"Sphere function {self._n}"
+        self._f = lambda *x: np.sum([x_i ** 2 for x_i in x], axis=0)
 
 
 class Rosenbrock(TestFunction):
 
     def __init__(self, n):
-        try:
-            assert n >= 2
-        except AssertionError:
-            raise AssertionError(f"n must be >= than 2, but is ={n}")
+        self._catch_n(n)
         super().__init__()
+        self._str = f"Rosenbrock function [{n}D]"
         self._bounds = np.array([
             [-1.5] * n,
             [+1.5] * n])
         self._optimum = [([1.0] * n, 0.0)]
-        self._f = lambda x_i_p_1, x_i: 100 * (x_i_p_1 - x_i ** 2) ** 2 + (1 - x_i) ** 2
+        self._a = lambda x_i_p_1, x_i: 100 * (x_i_p_1 - x_i ** 2) ** 2 + (1 - x_i) ** 2
+        self._f = lambda *x: np.sum([self._a(x_i_p_1, x_i) for x_i_p_1, x_i in zip(x[1:], x[:-1])], axis=0)
         self._n = n
-
-    def __call__(self, *x):
-        return np.sum([self._f(x_i_p_1, x_i) for x_i_p_1, x_i in zip(x[1:], x[:-1])], axis=0)
-
-    def __str__(self):
-        return f"Rosenbrock function {self._n}D"
 
 
 class Beale(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Beale function [2D]"
         self._bounds = np.array([
             [-4.5] * 2,
             [+4.5] * 2])
         self._optimum = [([3, 0.5], 0.0)]
         self._f = lambda x, y: (1.5 - x + x * y) ** 2 + (2.25 - x + x * y ** 2) ** 2 + (2.625 - x + x * y ** 3) ** 2
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
-    def __str__(self):
-        return f"Beale function 2D"
-
 
 class GoldsteinPrice(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Goldstein–Price function [2D]"
         self._bounds = np.array([
             [-2] * 2,
             [+2] * 2])
@@ -219,59 +219,38 @@ class GoldsteinPrice(TestFunction):
                 18 - 32 * x + 12 * x ** 2 + 48 * y - 36 * x * y + 27 * y ** 2)
         self._f = lambda x, y: self._a1(x, y) * self._a2(x, y)
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
-    def __str__(self):
-        return "Goldstein–Price function 2D"
-
 
 class Booth(TestFunction):
     def __init__(self):
         super().__init__()
+        self._str = "Booth function [2D]"
         self._bounds = np.array([
             [-10.0] * 2,
             [+10.0] * 2])
         self._optimum = [([1.0, 3.0], 0.0)]
         self._f = lambda x, y: (x + 2 * y - 7) ** 2 + (2 * x + y - 5) ** 2
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
-    def __str__(self):
-        return "Booth function 2D"
-
 
 class BukinN6(TestFunction):
     def __init__(self):
         super().__init__()
+        self._str = "Bukin function N.6 [2D]"
         self._bounds = np.array([
             [-15.0, -3],
             [-5.00, +3]])
         self._optimum = [([-10.0, 1.0], 0.0)]
         self._f = lambda x, y: 100 * np.sqrt(np.abs(y - 0.01 * x ** 2)) + 0.01 * np.abs(x + 10)
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
-    def __str__(self):
-        return "Bukin function N.6 2D"
-
 
 class Matyas(TestFunction):
     def __init__(self):
         super().__init__()
+        self._str = "Matyas function [2D]"
         self._bounds = np.array([
             [-10.0] * 2,
             [+10.0] * 2])
         self._optimum = [([0.0, 0.0], 0.0)]
         self._f = lambda x, y: 0.26 * (x ** 2 + y ** 2) - 0.48 * x * y
-
-    def __call__(self, x, y):
-        return self._f(x, y)
-
-    def __str__(self):
-        return "Matyas function 2D"
 
 
 class LeviN13(TestFunction):
@@ -284,9 +263,6 @@ class LeviN13(TestFunction):
         self._f = lambda x, y: (np.sin(3 * np.pi * x) ** 2 + (x - 1) ** 2 * (1 + np.sin(3 * np.pi * y) ** 2)
                                 + (y - 1) ** 2 * (1 + np.sin(2 * np.pi * y)))
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
     def __str__(self):
         return "Lévi function N.13 2D"
 
@@ -298,6 +274,7 @@ class Himmelblau(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Himmelblau's function [2D]"
         self._bounds = np.array([
             [-5.0, -5.0],
             [+5.0, +5.0]])
@@ -309,27 +286,16 @@ class Himmelblau(TestFunction):
         ]
         self._f = lambda x, y: (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
-    def __str__(self):
-        return "Himmelblau's function 2D"
-
 
 class ThreeHumpCamel(TestFunction):
     def __init__(self):
         super().__init__()
+        self._str = "Three-hump camel function [2D]"
         self._bounds = np.array([
             [-5.0] * 2,
             [+5.0] * 2])
         self._optimum = [([0.0, 0.0], 0.0)]
         self._f = lambda x, y: 2 * x ** 2 - 1.05 * x ** 4 + x ** 6 / 6 + x * y + y ** 2
-
-    def __call__(self, x, y):
-        return self._f(x, y)
-
-    def __str__(self):
-        return "Three-hump camel function"
 
 
 class Easom(TestFunction):
@@ -338,21 +304,18 @@ class Easom(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Easom function [2D]"
         self._bounds = np.array([
             [-100, -100],
             [+100, +100]])
         self._optimum = [((np.pi, np.pi), (-1.0))]
-
-    def __call__(self, x, y):
-        return - np.cos(x) * np.cos(y) * np.exp(-((x - np.pi) ** 2 + (y - np.pi) ** 2))
-
-    def __str__(self):
-        return "Easom Function"
+        self._f = lambda x, y: - np.cos(x) * np.cos(y) * np.exp(-((x - np.pi) ** 2 + (y - np.pi) ** 2))
 
 
 class CrossInTray(TestFunction):
     def __init__(self):
         super().__init__()
+        self._str = "Cross In Tray function [2D]"
         self._bounds = np.array([
             [-10.0] * 2,
             [+10.0] * 2])
@@ -364,9 +327,6 @@ class CrossInTray(TestFunction):
         self._f = lambda x, y: -1e-4 * (
                 np.abs(np.sin(x) * np.sin(y) * np.exp(np.abs(100 - np.sqrt(x ** 2 + y ** 2) / np.pi))) + 1) ** 1e-1
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
 
 class Eggholder(TestFunction):
     """
@@ -375,15 +335,13 @@ class Eggholder(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Eggholder function [2D]"
         self._bounds = np.array([
             [-512, -512],
             [+512, +512]])
         self._optimum = [([512, 404.2319], -959.6407)]
         self._f = lambda x, y: - (y + 47) * np.sin(np.sqrt(np.abs(x / 2. + (y + 47)))) - x * np.sin(
             np.sqrt(np.abs(x - (y + 47))))
-
-    def __call__(self, x, y):
-        return self._f(x, y)
 
 
 class HolderTable(TestFunction):
@@ -393,14 +351,12 @@ class HolderTable(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Holder Table function [2D]"
         self._bounds = np.array([
             [-10] * 2,
             [+10] * 2])
         self._optimum = [([512, 404.2319], -959.6407)]
         self._f = lambda x, y: - np.abs(np.sin(x) * np.cos(y) * np.exp(np.abs(1 - np.sqrt(x ** 2 + y ** 2) / np.pi)))
-
-    def __call__(self, x, y):
-        return self._f(x, y)
 
 
 class McCormick(TestFunction):
@@ -410,14 +366,12 @@ class McCormick(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "McCormick function [2D]"
         self._bounds = np.array([
             [-1.5, -3.0],
             [+4.0, +4.0]])
         self._optimum = [([-0.54719, -1.54719], -1.9133)]
         self._f = lambda x, y: np.sin(x + y) + (x - y) ** 2 - 1.5 * x + 2.5 * y + 1
-
-    def __call__(self, x, y):
-        return self._f(x, y)
 
 
 class SchafferN2(TestFunction):
@@ -427,6 +381,7 @@ class SchafferN2(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Schaffer function N. 2	[2D]"
         self._bounds = np.array([[-100, -100], [100, 100]])
         self._optimum = [([0.0, 0.0], 0.0)]
         self._f = lambda x, y: 0.5 + (np.sin(x ** 2 - y ** 2) ** 2 - 0.5) / (1 + 0.001 * (x ** 2 + y ** 2)) ** 2
@@ -442,6 +397,7 @@ class SchafferN4(TestFunction):
 
     def __init__(self):
         super().__init__()
+        self._str = "Schaffer function N. 4 [2D]"
         self._bounds = np.array([
             [-100, -100],
             [+100, +100]])
@@ -453,18 +409,13 @@ class SchafferN4(TestFunction):
         self._f = lambda x, y: 0.5 + (np.cos(np.sin(np.abs(x ** 2 - y ** 2))) ** 2 - 0.5) / (
                 1 + 0.001 * (x ** 2 + y ** 2)) ** 2
 
-    def __call__(self, x, y):
-        return self._f(x, y)
-
 
 class StyblinskiTang(TestFunction):
 
     def __init__(self, n):
-        try:
-            assert n >= 1
-        except AssertionError:
-            raise AssertionError(f"n must be >= than 1, but is ={n}")
+        self._catch_n(n)
         super().__init__()
+        self._str = f"Styblinski–Tang function [{n}D]"
         self._bounds = np.array([
             [-5] * n,
             [+5] * n])
@@ -479,11 +430,9 @@ class StyblinskiTang(TestFunction):
 class GarrettLagadec(TestFunction):
 
     def __init__(self, n, lam=0.5):
-        try:
-            assert n >= 1
-        except AssertionError:
-            raise AssertionError(f"n must be >= than 1, but is ={n}")
+        self._catch_n(n)
         super().__init__()
+        self._str = f"GarrettLagadec lam{lam} [{n}D]"
 
         def get_opt(n, lam):
             sol = np.array([[]])
@@ -506,10 +455,7 @@ class GarrettLagadec(TestFunction):
         def f(x_vec):
             return np.max([np.min([np.abs(x_i - lam), np.abs(x_i + lam)], axis=0) for x_i in x_vec], axis=0)
 
-        self._f = lambda x_vec: f(x_vec)
-
-    def __call__(self, *x):
-        return self._f(x)
+        self._f = lambda *x_vec: f(x_vec)
 
 
 class Test_x15_y21:
