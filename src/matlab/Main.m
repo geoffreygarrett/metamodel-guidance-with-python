@@ -1,8 +1,5 @@
 clear all;
 
-% Design vector.
-%x = Simulink.Parameter([0.2, 0.05, 0.1, 0.1, 0.1, 0.1]);
-
 % Parameters.
 g              = Simulink.Parameter(9.81);  % [m/s/s]
 init_position  = Simulink.Parameter(0.0);   % [m]
@@ -19,18 +16,13 @@ env_forest = [0.40,0.60];                     % [-] Fraction of route.
 env_t_rain_start = 100.0;                     % [-] Fraction of route.  
 env_mu_s_dry = 0.7;
 env_mu_s_wet = 0.4;
+%env_Cd = 0.88; % Coefficient of drag (drops)  % [-]
+%env_rho = 1.225 % Air density at sea-level.
 
-
-save("test");
-simIn = Simulink.SimulationInput('Bicycle');
-% simIn.setModelParameter('init_position', init_position);
-% simIn.setModelParameter('init_velocity', init_velocity);
-% simIn.setModelParameter('body_mass', body_mass);
-% simIn.setModelParameter('x', x);
-
+simIn = Simulink.SimulationInput('rs_bicycle');
 simIn = simIn.setModelParameter('StopTime', string(200));
-simIn = simIn.setModelParameter('FixedStep', string(0.1));
-simIn = simIn.setModelParameter('Solver', 'ode4');
+simIn = simIn.setModelParameter('FixedStep', string(5));
+%simIn = simIn.setModelParameter('Solver', 'ode4');
 
 simOut = sim(simIn);
 

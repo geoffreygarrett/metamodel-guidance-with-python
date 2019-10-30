@@ -3,9 +3,11 @@ venv
 lib/
 libs/
 data/
-models/
+sim/*
+trained_models/
 CMakeFiles/
-_CPack_Packages/
+_CPack_Packagess
+/
 Makefile
 CMakeCache.txt
 CPackConfig.cmake
