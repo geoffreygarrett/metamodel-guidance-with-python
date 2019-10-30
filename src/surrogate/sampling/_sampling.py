@@ -18,14 +18,30 @@ def _grid_auxiliary(grids_1d, flatten, components_across):
 
 
 @check_bounds
-def _uniform_grid(bounds, n_sample, flatten=True, endpoint=True, components_across="col"):
-    grids_1d = [np.linspace(bounds[0][i], bounds[1][i], n_sample, endpoint=endpoint) for i in range(len(bounds[0]))]
+def _uniform_grid(bounds, n_sample, flatten=True, edges=False, components_across="col"):
+    if edges:
+        start = bounds[0]
+        end = bounds[1]
+    else:
+        width = (bounds[1] - bounds[0]) / n_sample
+        start = bounds[0] + 0.5 * width
+        end = bounds[1] - 0.5 * width
+    grids_1d = [np.linspace(start[i], end[i], n_sample, endpoint=True) for i in range(len(bounds[0]))]
     return _grid_auxiliary(grids_1d, flatten, components_across)
 
 
 @check_bounds
-def _custom_grid(bounds, n_sample_tuple, flatten=True, endpoint=True, components_across="col"):
-    grids_1d = [np.linspace(bounds[0][i], bounds[1][i], n_sample_tuple[i], endpoint=endpoint) for i in
+def _full_factorial(bounds, n_sample_tuple, flatten=True, edges=False, components_across="col"):
+    if edges:
+        start = bounds[0]
+        end = bounds[1]
+    else:
+        width = (bounds[1] - bounds[0]) / np.array(n_sample_tuple)
+        print(np.array(n_sample_tuple))
+        print(width)
+        start = bounds[0] + 0.5 * width
+        end = bounds[1] - 0.5 * width
+    grids_1d = [np.linspace(start[i], end[i], n_sample_tuple[i], endpoint=True) for i in
                 range(len(bounds[0]))]
     return _grid_auxiliary(grids_1d, flatten, components_across)
 
@@ -70,7 +86,7 @@ def _multivariate_normal(mean, covariance, n_sample, seed=None, components_acros
 
 
 if __name__ == "__main__":
-    print(_custom_grid([[0, 0], [1, 1]], (20, 3), flatten=True, components_across="row"))
+    print(_full_factorial([[0, 0], [1, 1]], (20, 3), flatten=True, components_across="row"))
     print(_halton([[0, 0], [1, 1]], 5, components_across="row"))
     print(_random_uniform([[0, 0], [1, 1]], 5, components_across="row"))
     print(_multivariate_normal(np.array([0.5, 0.5]), np.array([[1, 0], [0, 1]]), 5, components_across="row"))

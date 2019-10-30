@@ -3,7 +3,7 @@ venv
 lib/
 libs/
 data/
-sim/*
+simulation/data
 trained_models/
 CMakeFiles/
 _CPack_Packagess
