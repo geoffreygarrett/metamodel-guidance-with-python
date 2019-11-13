@@ -9,12 +9,12 @@
  *
  * Model version              : 1.71
  * Simulink Coder version : 9.2 (R2019b) 18-Jul-2019
- * C source code generated on : Wed Oct 30 16:52:37 2019
+ * C source code generated on : Thu Oct 31 17:14:02 2019
  *
  * Target selection: rsim.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
- * Code generation objectives: Unspecified
+ * Code generation objective: Execution efficiency
  * Validation result: Not run
  */
 

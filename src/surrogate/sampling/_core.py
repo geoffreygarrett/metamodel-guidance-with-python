@@ -4,9 +4,10 @@ from ._sampling import _full_factorial
 from ._sampling import _halton
 from ._sampling import _random_uniform
 from ._sampling import _multivariate_normal
+from ._sampling import _cvt
 
 
-def uniform_grid(bounds, n_sample, flatten=True, edges=False, components_across="row"):
+def uniform_grid(bounds, n_sample, flatten=True, edges=False, form="sx"):
     """Uniform Grid (UG).
     Uniform grid (UG) is the simplest sampling method in which the samples are created using node points at fixed
     intervals uniformly distributed for every dimension.
@@ -20,10 +21,10 @@ def uniform_grid(bounds, n_sample, flatten=True, edges=False, components_across=
     :param components_across: Ignored if flatten=True.
     :return:
     """
-    return _uniform_grid(bounds, n_sample, flatten, edges, components_across)
+    return _uniform_grid(bounds, n_sample, flatten, edges, form)
 
 
-def full_factorial(bounds, n_sample_tuple, flatten=True, edges=True, components_across="row"):
+def full_factorial(bounds, n_sample_tuple, flatten=True, edges=True, form="sx"):
     """ Custom Grid (CG).
     This Grid method is the sample as the UG method, but allows for non-uniform grid sampling.
 
@@ -36,10 +37,10 @@ def full_factorial(bounds, n_sample_tuple, flatten=True, edges=True, components_
     :param components_across: Ignored if flatten=True.
     :return:
     """
-    return _full_factorial(bounds, n_sample_tuple, flatten=True, edges=True, components_across="row")
+    return _full_factorial(bounds, n_sample_tuple, flatten, edges, form)
 
 
-def halton(bounds, n_sample, components_across="row"):
+def halton(bounds, n_sample, form="sx"):
     """
 
     :param bounds:
@@ -47,10 +48,10 @@ def halton(bounds, n_sample, components_across="row"):
     :param components_across:
     :return:
     """
-    return _halton(bounds, n_sample, components_across)
+    return _halton(bounds, n_sample, form)
 
 
-def multivariate_normal(mean, covariance, n_sample, seed=None, components_across="row"):
+def multivariate_normal(mean, covariance, n_sample, seed=None, form="sx"):
     """
 
     :param mean:
@@ -60,19 +61,36 @@ def multivariate_normal(mean, covariance, n_sample, seed=None, components_across
     :param components_across:
     :return:
     """
-    return _multivariate_normal(mean, covariance, n_sample, seed, components_across)
+    return _multivariate_normal(mean, covariance, n_sample, seed, form)
 
 
-def random_uniform(bounds, n_sample, seed=None, components_across="row"):
+def random_uniform(bounds, n_sample, seed=None, form="sx"):
     """
 
     :param bounds:
     :param n_sample:
     :param seed:
-    :param components_across:
+    :param form:
     :return:
     """
-    return _random_uniform(bounds, n_sample, seed, components_across)
+    return _random_uniform(bounds, n_sample, seed, form)
 
-def cvt(bounds, n_sample, seed=None, components_across="row"):
+
+def cvt(xdim, gdim, initialize, sample, sample_num, iterations, seed=None, form="sx"):
+    """
+
+    :param xdim:
+    :param gdim:
+    :param initialize:
+    :param sample:
+    :param sample_num:
+    :param iterations:
+    :param seed:
+    :param form:
+    :return:
+    """
+    return _cvt(xdim, gdim, initialize, sample, sample_num, iterations, seed, form)
+
+
+if __name__ == "__main__":
     pass

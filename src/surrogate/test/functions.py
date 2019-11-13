@@ -1,5 +1,4 @@
 import numpy as np
-from itertools import combinations
 
 
 def f0(x1, f=9.0):
@@ -574,7 +573,7 @@ class TestFunctionSetNDInputSpace:
 
 
 if __name__ == "__main__":
-    from sampling.uninformed import grid_sample_domain
+    pass
 
     # GarrettLagadec = GarrettLagadec(2)
     #

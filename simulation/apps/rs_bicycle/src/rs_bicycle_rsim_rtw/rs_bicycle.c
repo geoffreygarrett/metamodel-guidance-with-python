@@ -9,12 +9,12 @@
  *
  * Model version              : 1.71
  * Simulink Coder version : 9.2 (R2019b) 18-Jul-2019
- * C source code generated on : Wed Oct 30 16:52:37 2019
+ * C source code generated on : Thu Oct 31 17:14:02 2019
  *
  * Target selection: rsim.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
- * Code generation objectives: Unspecified
+ * Code generation objective: Execution efficiency
  * Validation result: Not run
  */
 
@@ -1728,7 +1728,7 @@ SimStruct * rs_bicycle(void)
     rtliSetLogXFinal(ssGetRTWLogInfo(rtS), "");
     rtliSetLogVarNameModifier(ssGetRTWLogInfo(rtS), "rt_");
     rtliSetLogFormat(ssGetRTWLogInfo(rtS), 0);
-    rtliSetLogMaxRows(ssGetRTWLogInfo(rtS), 0);
+    rtliSetLogMaxRows(ssGetRTWLogInfo(rtS), 1);
     rtliSetLogDecimation(ssGetRTWLogInfo(rtS), 1);
 
     /*
@@ -1876,10 +1876,10 @@ SimStruct * rs_bicycle(void)
     ssSetPeriodicStatesInfo(rtS, &periodicStatesInfo);
   }
 
-  ssSetChecksumVal(rtS, 0, 3655097565U);
-  ssSetChecksumVal(rtS, 1, 2286547166U);
-  ssSetChecksumVal(rtS, 2, 4195750601U);
-  ssSetChecksumVal(rtS, 3, 3478017694U);
+  ssSetChecksumVal(rtS, 0, 860356255U);
+  ssSetChecksumVal(rtS, 1, 561422876U);
+  ssSetChecksumVal(rtS, 2, 4095733675U);
+  ssSetChecksumVal(rtS, 3, 303308939U);
   return rtS;
 }
 

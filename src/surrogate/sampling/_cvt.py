@@ -24,9 +24,8 @@ class CVT:
                  ):
         self._bounds = bounds
         self._k = k
-        self._z = z_sample_method(bounds, k, components_across="row",
-                                  **z_sample_kwargs) if z_sample_kwargs else z_sample_method(bounds, k,
-                                                                                             components_across="row")
+        self._z = z_sample_method(bounds, k, form="sx",
+                                  **z_sample_kwargs) if z_sample_kwargs else z_sample_method(bounds, k, form="sx")
         self._alpha = alpha
         self._beta = beta
         self._j = np.ones(k)
@@ -78,7 +77,7 @@ class CVT:
         #
         # Compute the average u_i of the set W_i.
         #
-        u = [np.mean(w_i, axis=0) if w_i.size is not 0 else np.array([0, 0]) for w_i in w]
+        u = [np.mean(w_i, axis=0) if w_i.size is not 0 else np.zeros(len(self._bounds[0])) for w_i in w]
         #
         # If the set W_i is empty, do nothing; otherwise, update z_i:
         #
