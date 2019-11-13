@@ -21,6 +21,7 @@ boost-numpy-eigen-*-Linux.tar.gz
 *.o
 *.so
 *.pyc
+*.sv
 __pycache__/
 
 # Common build output folders
