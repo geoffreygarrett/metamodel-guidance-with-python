@@ -1,359 +1,719 @@
 import numpy as np
-from src.surrogate.sampling._pacc import *
-from src.surrogate.sampling import random_uniform, cvt, halton
-
-from sklearn import svm
-import skopt
-from src.surrogate.sampling._pacc import s_diego, s_pacc, s_val_diego
-from scipy.interpolate import interp1d
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from src.surrogate.test import TestFunctionSet2DInputSpace
-
-F2D = TestFunctionSet2DInputSpace()
-
-# scaler = StandardScaler()
-
-import numpy as np
+from math import ceil
+from sklearn.base import TransformerMixin
 from sklearn.model_selection import train_test_split
-from scipy.stats import norm
-import inspect
 
-from tqdm import tqdm_notebook as tqdm
-
-
-class TqdmSkopt(object):
-    def __init__(self, **kwargs):
-        self._bar = tqdm(**kwargs)
-
-    def __call__(self, res):
-        self._bar.update()
-
-    def close(self):
-        self._bar.close()
-        self._bar.clear()
-
-
-def marginal_cdf2(f, x):
-    _x_sorted = x[np.argsort(x)]
-    _f_sorted = f[np.argsort(x)]
-    aux = np.cumsum(_f_sorted)
-    _X = np.concatenate(([0], _x_sorted))
-    aux = np.concatenate(([0], aux))
-    _CDF = aux / np.max(aux)
-    return _X, _CDF
+from src.utils import DynamicLogger
+from src.utils import PACCEvaluationLog
+from src.surrogate.formatting import print_pacc_header
+from src.surrogate.formatting import print_pacc_iteration
+from src.surrogate.formatting import pacc_header_len
+from src.surrogate.sampling import InterpolatedMarginalInverseECDF
+from src.surrogate.sampling import null_mapping
+from src.surrogate.sampling import s_pacc
+from src.surrogate.sampling import s_idx_diego
+from src.surrogate.sampling import s_num_diego
+from src.surrogate.sampling import cvt
+from src.surrogate.sampling import random_uniform
+from src.surrogate.sampling import halton
+from src.surrogate.sampling import uniform_grid
+from src.surrogate.sampling import full_factorial
+from src.surrogate.algorithms import LutzPrecheltEarlyStopping
+import matplotlib.pyplot as plt
 
 
-def F_inverse_function(f, x):
-    _X, _CDF = marginal_cdf2(f, x)
-    return interp1d(_CDF, _X)
+class BaseIncrementalFunctionLearning:
+
+    @staticmethod
+    def _not_implemented():
+        NotImplementedError("Not implemented in base class.")
+
+    @staticmethod
+    def pacc_evaluate(f, f_s, epsilon, delta, with_error_array=False,
+                      score_return=False):
+        """
+
+        Parameters
+        ----------
+        f : ndarray, shape (samples,)
+            Actual function evaluations of input x.
+        f_s : ndarray, shape (samples,)
+            Surrogate function evaluations of input x.
+        epsilon : float
+            Desired accuracy level [0.0, 1.0)
+        delta : float
+            Desired confidence (1 - delta) level (0.0, 1.0].
+        with_error_array : bool, optional
+            Determines whether the arrays of abs_error and rel_error are
+            returned within the evaluation log.
+            Default = False
+        score_return : bool, optional
+
+        References
+        ----------
+
+        Returns
+        -------
+        evaluation_log : namedtuple (PACCEvaluationLog)
 
 
-def ssifl2(epsilon, delta, function, n, model_handle_cls,
-           hpopt=None,
-           scaler=None,
-           s_series=s_diego,
-           s_idx=s_val_diego,
-           path=None,
-           train_size=None,
-           val_size=None,
-           verbose=True,
-           save=True):
-    model_handle = model_handle_cls()
-    #
-    # Catch for only one argument set for either train_size or val_size.
-    #
-    try:
-        assert train_size is None or val_size is None
-    except AssertionError:
-        raise AssertionError(
-            """
-            Only one of (train_size,val_size) can be set as either integer or float:
-            - Float implies fraction of total data.
-            - Integer implies integer value of samples.
+        """
+
+        assert len(f) == len(f_s)
+        _n_samples = len(f)
+        _abs_error = np.abs(f - f_s)
+        _rel_error = _abs_error / (np.max(f) - np.min(f))
+        _n_passing = len(_abs_error[_abs_error <= epsilon])
+        _statistic = _n_passing / _n_samples
+        _terminate = _statistic >= 1.0 - delta
+
+        if score_return:
+            return (1.0 - delta) - _statistic
+        elif with_error_array:
+            return (PACCEvaluationLog(
+                n_samples=_n_samples,
+                n_passing=_n_passing,
+                statistic=_statistic,
+                terminate=_terminate), _rel_error)
+
+        else:
+            return PACCEvaluationLog(
+                n_samples=_n_samples,
+                n_passing=_n_passing,
+                statistic=_statistic,
+                terminate=_terminate)
+
+    @staticmethod
+    def concat_data(d1, d2):
+        r"""
+        Function to concatenate data format unique to this class.
+
+        Parameters
+        ----------
+        d1 : tuple of ndarray, size TODO: Size of d1.
+            Existing or `first in order` data.
+        d2 : tuple of ndarray, size TODO: Size of d2.
+            Additional or `second in order` data.
+
+        Returns
+        -------
+        concatenated_data : tuple of ndarray, size TODO: Size of return.
+
+        """
+        return np.vstack((d1[0], d2[0])), np.concatenate((d1[1], d2[1]))
+
+    def __init__(self, func, x_dim, meta_model, sample_num=s_num_diego,
+                 sample_idx=s_idx_diego, scaler=None, test_frac=0.2, seed=1,
+                 logging=0):
+        """
+        Parameters
+        ----------
+        func : function
+            Lebesge function to be learning by surrogate model.
+        x_dim : int
+            Number of input dimensions for the function to be learned
+            within the domain of [0,1] for each parameter.
+        meta_model :
+        sample_num : function, optional
+            The sampling sequence in the form of a callable where n is
+            the input domain dimension to be sampled from and index
+            is the sampling level according to the scheme
+            (Default is s_num_diego).
+        sample_idx : function, optional
+            The function that returns the index of sampling to be used
+            of a sampling scheme given a required minimum number of
+            samples.
+        scaler : TransformerMixin
+        logging: {0, 1, 2}, optional
+            Determines the level of logging after each iteration.
+                - 1 : Minimum required for evaluation
+                - 2 : Maximum logging.
+                    - Sampled data indices are stored w.r.t. each
+                      iteration.
+                    - Predictive model is stored for each iteration.
+            (Default is 0).
+
+        See Also
+        --------
+        s_num_diego :
+            Sampling sequence used in Diego G. Loyola R et al. [1]_
+        s_idx_diego :
+            Index of sampling used in Diego G. Loyola R et al. [1]_
+
+        References
+        ----------
+        ..  [1] Loyola R, D. G., Pedergnana, M., & Gimeno García, S.
+            (2016). Smart sampling and incremental function learning
+            for very large high dimensional data. Neural Networks, 78,
+            75–87. https://doi.org/10.1016/j.neunet.2015.09.001
+        """
+        self._iteration = 0
+        self._logging = logging
+        self._scaler = scaler
+        self._x_dim = x_dim
+        self._log = DynamicLogger(equal_logging=True)
+        self._test_frac = test_frac
+        self._seed = seed
+        self._training_data = None
+        self._validation_data = None
+        self._meta_model = meta_model
+        self._terminate = False
+
+        self.func = func
+        self.sample_idx = sample_idx
+        self.sample_num = sample_num
+
+    @property
+    def meta_model(self):
+        return self._meta_model
+
+    @property
+    def x_dim(self):
+        """
+
+        Returns
+        -------
+        x_dim : int
+            Dimension of the design vector.
+        """
+        return self._x_dim
+
+    @property
+    def scaler(self):
+        """
+
+        Returns
+        -------
+        scaler : TransformerMixin
+            Scaler for outputs of function.
+        """
+        return self._scaler
+
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __len__(self):
+        return len(self._log)
+
+    def __next__(self):
+        if self.terminate:
+            # Iterate terminated algorithm logs.
+            if self.n < len(self._log):
+                _iter = self._log[self.n]
+                self.n += 1
+                return _iter
+            else:
+                raise StopIteration
+
+        elif not self.terminate:
+            # Iterate learned iterations.
+            if self.n < self._iteration:
+                _iter = self._log[self.n]
+                self.n += 1
+                return _iter
+            # Requested index has not been learned.
+            elif self.n >= self._iteration:
+                self.iterate()
+                _iter = self._log[-1]
+                self.n += 1
+                return _iter
+
+    def sample(self, n, sampling, seed=None, mapping=null_mapping,
+               tdmq=False, verbose=False, **kwargs):
+        """
+        Method to encapsulate sampling methods for incremental
+        function learning purposes.
+
+        Parameters
+        ----------
+        n : list of int or int
+            Argument determining number of arguments. Varies depending
+            on the sampling method used.
+            - Represents integer number of samples for {'cvt',
+            'random_uniform', 'halton'}.
+            - Represents integer value to sampled for each dimension
+            for 'uniform_grid' sampling.
+            - Represents list of integer values for 'full_factorial'
+            sampling.
+        sampling : str
+            Sampling method to be used. Available are 'cvt',
+            'random_uniform', 'halton', 'uniform_grid' and
+            'full_factorial'.
+        seed : int
+            Seed to be used for algorithms which are pseudo-random.
+        mapping : function
+            Mapping function for non-uniform sampling. Currently only
+            supports non-uniform distribution sampling through mapping
+            uniform sampling of the inverse empirical cumulative
+            distribution function (Default is null_mapping).
+        tdmq : bool, optional
+            Progress bar in jupyter lab environment (default = False).
+        verbose : int or bool, optional
+            Sets verbosity of iterations of algorithm. True for each
+            iteration to be printed, integer value for frequency of
+            iterations to be printed.
+        **kwargs
+            Additional arguments that are to replace default
+            arguments of the sampling methods.
+
+        See Also
+        --------
+        tdmq : https://pypi.org/project/tqdm/
+
+        Returns
+        -------
+        x_sample : ndarray, size (n_samples, self.x_dim)
+            Sampled design of experiments array.
+        """
+        kwargs['tdmq'] = tdmq
+        kwargs['verbose'] = verbose
+        bounds = np.array([[0.] * self.x_dim, [1.] * self.x_dim])
+
+        if sampling is "cvt":
+            return mapping(cvt(self.x_dim, n, seed=seed, **kwargs))
+
+        elif sampling is "random_uniform":
+            return mapping(random_uniform(bounds, n, seed=seed, **kwargs))
+
+        elif sampling is "halton":
+            return mapping(halton(bounds, n, **kwargs))
+
+        elif sampling is "uniform_grid":
+            return mapping(uniform_grid(bounds, n, **kwargs))
+
+        elif sampling is "full_factorial":
+            return mapping(full_factorial(bounds, n, **kwargs))
+
+        else:
+            raise NameError(f"""
+            sampling="{sampling}" is not valid. Accepted are:
+            - cvt
+            - halton
+            - random_uniform
+            - uniform_grid
+            - full_factorial
+            See documentation for details.
             """)
-    #
-    # Initial S_val based on PACC framework evaluation lower limit.
-    #
-    s_val = s_idx(n, epsilon, delta)
-    #
-    # Initialised values for algorithm.
-    #
-    n_pass = 0
-    n_test = 1
-    iteration = 1
-    #
-    # Initial design of experiments.
-    #
-    idoe = cvt(n, int(s_series(n, s_val) * 1.25) + 1, halton, random_uniform, 1000, 50, seed=None, form="sx")
-    #
-    # Evaluation of IDOE.
-    #
-    fido = function(*idoe.T)
-    #
-    # Create scaler if scaler is defined and evaluate on IDOE.
-    #
-    if scaler:
-        X_idoe, y_idoe = idoe, scaler.fit_transform(fido.reshape(-1, 1)).flatten()
-    else:
-        X_idoe, y_idoe = idoe, fido.flatten()
-    #
-    # Split for training and validation data.
-    #
-    X_idoe_train, X_idoe_val, y_idoe_train, y_idoe_val = train_test_split(X_idoe, y_idoe,
-                                                                          train_size=s_series(n, s_val),
-                                                                          random_state=42)
-    #
-    # Prepare tupled training and validation data sets.
-    #
-    training_data = (X_idoe_train, y_idoe_train)
-    validation_data = (X_idoe_val, y_idoe_val)
-    #
-    # Prepare verbosity table headers.
-    #
-    header_printed = False
-    list_len_h = None
-    headers = None
-    if verbose is not None:
-        header_printed = False
-        headers = ["iter", "s_train", "n_s_test < epsilon", "n_s_test", "Pr(|fsm(x)-f(x)| <= epsilon)"]
-        list_len_h = list(map(lambda x: len(x) + 2, headers))
-        headers = [("{:^" + str(len(h) + 2) + "}").format(h) for h in headers]
-    #
-    # If hyperparameter optimisation is required.
-    #
-    x_hp_tested = []
-    f_hp_tested = []
-    hpopt_space = model_handle.space
 
-    @skopt.utils.use_named_args(hpopt_space)
-    def objective(**params):
-        model_handle.reset_model()
-        static_params = {"training_data": training_data, "validation_data": validation_data,
-                         "Xdim": len(training_data[0][0]), "fdim": 1}
-        model_handle.static_params = static_params
-        model_handle.hyper_params = params
-        model_handle.fit(*training_data)
-        return -model_handle.score(*validation_data)
+    @property
+    def terminate(self):
+        """
+        Signals completion of algorithm.
+
+        Returns
+        -------
+        terminate : bool
+            Returns the termination signal when the learning has
+            stagnated or achieved the required accuracy and
+            confidence.
+
+        """
+        return self._terminate
+
+    def iterate(self, tdmq=False, verbose=False):
+        """
+        Carries out next iteration of algorithm.
+
+        Parameters
+        ----------
+        tdmq : bool, optional
+            Progress bar in jupyter lab environment (default = False).
+        verbose : int or bool, optional
+            Sets verbosity of iterations of algorithm. True for each
+            iteration to be printed, integer value for frequency of
+            iterations to be printed.
+
+        Returns
+        -------
+
+        """
+        self._not_implemented()
+
+
+class SSIFL(BaseIncrementalFunctionLearning):
+
+    def __init__(self, func, x_dim, meta_model, delta, epsilon,
+                 sample_num=s_num_diego, sample_idx=s_idx_diego, scaler=None,
+                 test_frac=0.2, seed=42, logging=0, verbose=False, tdmq=False):
+        """
+        Parameters
+        ----------
+        func : function
+            Lebesge function to be learning by surrogate model.
+        x_dim : int
+            Number of input dimensions for the function to be learned
+            within the domain of [0,1] for each parameter.
+        epsilon : float
+            Desired accuracy level [0.0, 1.0)
+        delta : float
+            Desired confidence (1 - delta) level (0.0, 1.0].
+        meta_model:
+        sample_num : function, optional
+            The sampling sequence in the form of a callable where n is
+            the input domain dimension to be sampled from and index
+            is the sampling level according to the scheme
+            (Default is s_num_diego).
+        sample_idx : function, optional
+            The function that returns the index of sampling to be used
+            of a sampling scheme given a required minimum number of
+            samples.
+        scaler : TransformerMixin
+        test_frac : float
+        seed : int
+            (Default is 1).
+        logging: {0, 1, 2}, optional
+            Determines the level of logging after each iteration.
+                - 1 : Minimum required for evaluation
+                - 2 : Maximum logging.
+                    - Sampled data indices are stored w.r.t. each
+                      iteration.
+                    - Predictive model is stored for each iteration.
+            (Default is 0).
+        verbose: bool
+            (Default is False).
+        tdmq : bool
+            (Default is False).
+
+        See Also
+        --------
+        s_num_diego :
+            Sampling sequence used in Diego G. Loyola R et al. [1]_
+        s_idx_diego :
+            Index of sampling used in Diego G. Loyola R et al. [1]_
+
+        References
+        ----------
+        ..  [1] Loyola R, D. G., Pedergnana, M., & Gimeno García, S.
+            (2016). Smart sampling and incremental function learning
+            for very large high dimensional data. Neural Networks, 78,
+            75–87. https://doi.org/10.1016/j.neunet.2015.09.001
+        """
+        super().__init__(func, x_dim, meta_model, sample_num, sample_idx,
+                         scaler, test_frac, seed=seed,
+                         logging=logging)
+
+        self._algorithm_settings = dict(cumulative=True, importance="error",
+                                        tdmq=False,
+                                        verbose=False, hopt=True)
+        self.delta = delta
+        self.epsilon = epsilon
+        # self.meta_model.static_params['epsilon'] = 0.975 * epsilon
+
+        # Determine initial design of experiments based of s_pacc.
+        self._s_min = s_pacc(self.epsilon, self.delta)
+
+        # Determine index of closest sample num after minimum.
+        self._s_idx = self.sample_idx(self.x_dim, self._s_min)
+
+        # Determine the sample number of that index.
+        self._s_num = self.sample_num(self.x_dim, self._s_idx)
+
+        # Sample initial design of experiments using CVT.
+        x_idoe_train = self.sample(self._s_num,
+                                   "cvt", seed=self._seed, tdmq=tdmq,
+                                   verbose=verbose)
+
+        x_idoe_val = self.sample(self.sample_num(self.x_dim, self._s_idx - 1),
+                                 "cvt", seed=self._seed - 1, tdmq=tdmq,
+                                 verbose=verbose)
+
+        # Evaluate the experiments.
+        f_idoe_train = self.func(*x_idoe_train.T)
+        f_idoe_val = self.func(*x_idoe_val.T)
+
+        # Scale if scaler is set.
+        if self.scaler is not None:
+            f_idoe_train = self.scaler.fit_transform(
+                f_idoe_train.reshape(-1, 1)).flatten()
+            f_idoe_val = self.scaler.transform(
+                f_idoe_val.reshape(-1, 1)).flatten()
+
+        # Split 80/20 train/validation.
+        # (x_idoe_train,
+        #  x_idoe_val,
+        #  y_idoe_train,
+        #  y_idoe_val) = train_test_split(
+        #     x_idoe, f_idoe,
+        #     train_size=self._s_num,
+        #     random_state=seed)
+
+        # Set training and validation data
+        self._training_data = (x_idoe_train, f_idoe_train)
+        self._validation_data = (x_idoe_val, f_idoe_val)
+
+    # Define scoring function for hyperparameter optimisation.
+    def model_score(self, model):
+        return self.pacc_evaluate(self._validation_data[1],
+                                  model.predict(self._validation_data[0]),
+                                  self.epsilon,
+                                  self.delta,
+                                  score_return=True)
+
+    @property
+    def algorithm_settings(self):
+        return self._algorithm_settings
+
+    @algorithm_settings.setter
+    def algorithm_settings(self, x):
+        self._algorithm_settings = x
 
     #
-    # Begin algorithm while loop until condition of accuracy with confidence is acquired.
-    #
-    # below_minimum = lambda: (iteration < int(16 ** (1 / n)))
-    below_minimum = lambda: False
-    not_confident = lambda: (n_pass / n_test <= 1 - delta)
-    while not_confident() or below_minimum():
-        #
-        # If hyperparameter optimisation is required.
-        #
-        if hpopt is not None:
-            x0 = x_hp_tested if len(x_hp_tested) > 0 else None
-            y0 = f_hp_tested if len(f_hp_tested) > 0 else None
-            x0_ = None
-            if x0 is not None and y0 is not None:
-                y0 = np.array(y0)
-                ybest = np.argsort(y0)[:3]
-                x0_ = [x0[int(yb)] for yb in ybest]
-                y0 = None
-            n_calls = 15
-            total = n_calls if x0_ is None else 15 - len(x0_) + 1
-            progress = TqdmSkopt(total=total, desc="Model HpOpt", leave=False)
-            results = skopt.forest_minimize(objective, hpopt_space, verbose=False, n_calls=n_calls, x0=x0_, y0=y0,
-                                            callback=[progress])
-            progress.close()
-            x_hp_tested.append(results.x)
-            f_hp_tested.append(results.fun)
-            model_handle.reset_model()
-            static_params = {"training_data": training_data, "validation_data": validation_data,
-                             "Xdim": len(training_data[0][0]), "fdim": 1}
-            model_handle.static_params = static_params
-            model_handle.hyper_params = model_handle.hyper_params_x(results.x)
-            current_model = model_handle
+    # def iterate(self, cumulative=True, importance="error", tdmq=False,
+    #             verbose=False, hopt=True):
+
+    def iterate(self, cumulative=True, importance="error", tdmq=False,
+                verbose=False, hopt=True, clip=1e-8, v=3):
+        """
+        Carries out next iteration of algorithm.
+
+        Parameters
+        ----------
+        cumulative : bool, optional
+        importance : {'none', 'error', 'max', 'min'}
+        tdmq : bool, optional
+            Progress bar in jupyter lab environment (default = False).
+        verbose : int or bool, optional
+            Sets verbosity of iterations of algorithm. True for each
+            iteration to be printed, integer value for frequency of
+            iterations to be printed.
+
+
+        Returns
+        -------
+
+        """
+
+        cumulative = self.algorithm_settings["cumulative"]
+        importance = self.algorithm_settings["importance"]
+        tdmq = self.algorithm_settings["tdmq"]
+        verbose = self.algorithm_settings["verbose"]
+        hopt = self.algorithm_settings["hopt"]
+        clip = self.algorithm_settings["clip"]
+        v = self.algorithm_settings["v"]
+
+        if self.terminate:
+            raise AssertionError(
+                "Termination cond. met. Set force as True for continued iter.")
+
+        if hopt:
+            # Fit and optimise the tunable parameters of the model.
+            self.meta_model.fit_optimise(*self._training_data,
+                                         *self._validation_data,
+                                         score_function=self.model_score,
+                                         reset=False,
+                                         verbose=verbose,
+                                         tdmq=tdmq)
+
         else:
-            model_handle.reset_model()
-            static_params = {"training_data": training_data, "validation_data": validation_data,
-                             "Xdim": len(training_data[0][0]), "fdim": 1}
-            model_handle.static_params = static_params
-            current_model = model_handle
-        #
-        # Statistical model evaluation.
-        #
-        current_model.fit(*training_data)
-        f_validation = current_model.predict(validation_data[0])
-        square_error = np.square(f_validation - validation_data[1])
-        absolute_error = np.abs(f_validation - validation_data[1])
-        x_test = epsilon * (np.max(validation_data[1]) - np.min(validation_data[1]))
-        n_pass = absolute_error[absolute_error <= x_test].size
-        n_test = absolute_error.size
+            self.meta_model.fit(*self._training_data,
+                                *self._validation_data,
+                                reset=False,
+                                verbose=verbose,
+                                tdmq=tdmq)
 
-        if iteration % verbose == 0:
-            # TODO: Make print string imported.
-            cols = [iteration, s_series(n, s_val), n_pass, n_test, np.round(n_pass / n_test, 3)]
-            if header_printed is False:
-                print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
-                print('|'.join([""] + headers + [""]))
-                print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
-                header_printed = True
+        # Evaluate the model according to the PACC framework.
+        evaluation_log, rel_error = self.pacc_evaluate(
+            f=self._validation_data[1],
+            f_s=self.meta_model.predict(self._validation_data[0]),
+            delta=self.delta,
+            epsilon=self.epsilon,
+            with_error_array=True)
+        self._terminate = evaluation_log.terminate
 
-            print('|'.join(
-                [""] + [("{:^" + str(len_h) + "}").format(col) for len_h, col in zip(list_len_h, cols)] + [""]))
+        if verbose:
+            # Print headers if verbose.
+            if self._iteration == 0:
+                print_pacc_header()
+            print_pacc_iteration(self._iteration,
+                                 self._s_num,
+                                 evaluation_log)
 
-        if not_confident() or below_minimum():
-            iteration += 1
-            s_val += 1
-            new_s = s_series(n, s_val) - s_series(n, s_val - 1)
-            new_t = int(0.25 * new_s) + 1
-            new_input_u = random_uniform([[0] * n, [1] * n], new_s + new_t)
+        if not self.terminate:
+            # Increase iteration count and sample idx.
+            self._iteration += 1
+            self._s_idx += 1
 
-            e_cdf = [F_inverse_function(square_error, validation_data[0].T[i]) for i in range(n)]
-            new_input = np.vstack([e_cdf[i](u) for i, u in enumerate(new_input_u.T)]).T
-            _f = function(*new_input.T)
+            # Determine the sample number of that index.
+            self._s_num = self.sample_num(self.x_dim, self._s_idx)
 
-            if scaler:
-                X_new, y_new = new_input, scaler.transform(_f.reshape(-1, 1)).flatten()
+            if cumulative:
+                s_new = ceil((1 + self._test_frac) *
+                             (self._s_num - self.sample_num(self.x_dim,
+                                                            self._s_idx - 1)))
             else:
-                X_new, y_new = new_input, _f.flatten()
-            X_train_, X_test_, y_train_, y_test_ = train_test_split(X_new, y_new, train_size=new_s, random_state=42)
-            training_data = (np.vstack((training_data[0], X_train_)), np.concatenate((training_data[1], y_train_)))
-            validation_data = (np.vstack((validation_data[0], X_test_)), np.concatenate((validation_data[1], y_test_)))
+                s_new = self._s_num
 
-        else:
-            print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
-            print('|'.join(
-                [""] + [("{:^" + str(len_h) + "}").format(col) for len_h, col in zip(list_len_h, cols)] + [""]))
-            print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
+            if importance == 'error':
+                all_data = self.concat_data(self._training_data,
+                                            self._validation_data)
+                _importance_log, _rel_error = self.pacc_evaluate(
+                    f=all_data[1],
+                    f_s=self.meta_model.predict(all_data[0]),
+                    delta=self.delta,
+                    epsilon=self.epsilon,
+                    with_error_array=True)
+                if clip is not False:
+                    p = np.where(rel_error >= self.epsilon, rel_error ** v,
+                                 clip),
+                else:
+                    p = rel_error ** v
+                mapping = InterpolatedMarginalInverseECDF(
+                    p=p,
+                    x=self._validation_data[0],
+                    kind='linear')
 
-    if save:
-        current_model.save(path)
+            elif importance == 'none':
+                mapping = null_mapping
 
-    return current_model  # , training_log,
-
-
-def ssifl(epsilon, delta, function, n, hpopt=None, scaler=None):
-    s_val = s_val_diego(n, epsilon, delta)
-    n_pass = 0
-    n_test = 1
-    iteration = 0
-    idoe = cvt(n, int(s_diego(n, s_val) * 1.25) + 1, halton, random_uniform, 1000, 50, seed=None, form="sx")
-    _fido = function(*idoe.T)
-    if scaler:
-        X_new, y_new = idoe, scaler.fit_transform(_fido.reshape(-1, 1)).flatten()
-    else:
-        X_new, y_new = idoe, _fido.flatten()
-    X_train_, X_test_, y_train_, y_test_ = train_test_split(X_new, y_new, train_size=s_diego(n, s_val), random_state=42)
-    train_data = (X_train_, y_train_)
-    test_data = (X_test_, y_test_)
-    header_printed = False
-    headers = ["iter", "s_train", "n_s_test < epsilon", "n_s_test", "Pr(|fsm(x)-f(x)| <= epsilon)"]
-    list_len_h = list(map(lambda x: len(x) + 2, headers))
-    headers = [("{:^" + str(len(h) + 2) + "}").format(h) for h in headers]
-    x_hp_tested = []
-    f_hp_tested = []
-
-    while (n_pass / n_test <= 1 - delta) or (iteration < int(16 ** (1 / n))):
-        iteration += 1
-        #
-        # Optimize model parameters, if set.
-        #
-        if hpopt is not None:
-            SPACE = [skopt.space.Real(0.01, 1e3, name='gamma'),
-                     skopt.space.Real(1, 200, name='C'),
-                     skopt.space.Integer(0, 1, name='k_idx')
-                     ]
-
-            kernels = ['rbf', 'linear']
-
-            STATIC_PARAMS = {}
-
-            @skopt.utils.use_named_args(SPACE)
-            def objective(**params):
-                all_params = {**params, **STATIC_PARAMS}
-                clf = svm.SVR(C=all_params["C"], gamma=all_params["gamma"], kernel=kernels[all_params['k_idx']],
-                              max_iter=-1)
-                clf.fit(*train_data)
-                # return np.mean(np.abs(clf.predict(test_data[0]) - test_data[1]))
-                return -clf.score(*test_data)
-
-            x0 = x_hp_tested if len(x_hp_tested) > 0 else None
-            y0 = f_hp_tested if len(f_hp_tested) > 0 else None
-            x0_ = None
-            if x0 is not None and y0 is not None:
-                y0 = np.array(y0)
-                ybest = np.argsort(y0)[:5]
-                x0_ = [x0[int(yb)] for yb in ybest]
-                y0 = None
-            results = skopt.forest_minimize(objective, SPACE, verbose=False, n_calls=15, x0=x0_, y0=y0)
-            gamma, C, k_idx = results.x
-            x_hp_tested.append(results.x)
-            f_hp_tested.append(results.fun)
-            clf = svm.SVR(C=C, gamma=gamma, kernel=kernels[k_idx])
-        else:
-            clf = svm.SVR(gamma="scale")
-
-        clf.fit(*train_data)
-        #
-        #
-        f_test = clf.predict(test_data[0])
-        #
-        #
-        error = np.abs(f_test - test_data[1])
-
-        x_test = epsilon * (np.max(test_data[1]) - np.min(test_data[1]))
-        n_pass = error[error <= x_test].size
-        n_test = error.size
-
-        if iteration % 1 == 0:
-            # TODO: Make print string imported.
-            cols = [iteration, s_diego(n, s_val), n_pass, n_test, np.round(n_pass / n_test, 3)]
-            # str_cols = [("{:" + str(max_len) + "}").format(str(item)) for item in cols]
-            if header_printed is False:
-                print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
-                print('|'.join([""] + headers + [""]))
-                print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
-                header_printed = True
-
-            print('|'.join(
-                [""] + [("{:^" + str(len_h) + "}").format(col) for len_h, col in zip(list_len_h, cols)] + [""]))
-
-            # print(
-            #     f"""
-            # iteration  : {iteration};
-            # ===============================
-            # n_samples  : {s_diego(n, s_val)};
-            # n_pass     : {n_pass};
-            # n_test     : {n_test};
-            # Pr e <= ep : {np.round(n_pass / n_test, 4)}
-            # """)
-
-        if n_pass / n_test <= 1 - delta or iteration < int(16 ** (1 / n)):
-            s_val += 1
-            new_s = s_diego(n, s_val) - s_diego(n, s_val - 1)
-            new_t = int(0.25 * new_s) + 1
-            new_input_u = random_uniform([[0] * n, [1] * n], new_s + new_t)
-            #
-            # Importance sampling.
-            #
-            #     # Generate error inverse CDF.
-            #     #
-            e_cdf = [F_inverse_function(error, test_data[0].T[i]) for i in range(n)]
-            new_input = np.vstack([e_cdf[i](u) for i, u in enumerate(new_input_u.T)]).T
-            _f = function(*new_input.T)
-
-            if scaler:
-                X_new, y_new = new_input, scaler.transform(_f.reshape(-1, 1)).flatten()
             else:
-                X_new, y_new = new_input, _f.flatten()
-            X_train_, X_test_, y_train_, y_test_ = train_test_split(X_new, y_new, train_size=new_s, random_state=42)
-            train_data = (np.vstack((train_data[0], X_train_)), np.concatenate((train_data[1], y_train_)))
-            test_data = (np.vstack((test_data[0], X_test_)), np.concatenate((test_data[1], y_test_)))
+                raise NotImplementedError("Only error importance sampling" +
+                                          "currently supported")
+
+            # Sample initial design of experiments using CVT.
+            x_new = self.sample(s_new, "cvt", seed=self._seed,
+                                tdmq=tdmq,
+                                verbose=verbose,
+                                mapping=mapping)
+
+            # Evaluate the experiments.
+            f_new = self.func(*x_new.T)
+
+            # Scale if scaler is set.
+            if self.scaler is not None:
+                f_new = self.scaler.transform(f_new.reshape(-1, 1)).flatten()
+
+            if cumulative:
+                # Split train/validation.
+                (x_new_train,
+                 x_new_val,
+                 y_new_train,
+                 y_new_val) = train_test_split(
+                    x_new, f_new,
+                    train_size=(self._s_num - self.sample_num(self.x_dim,
+                                                              self._s_idx - 1)),
+                    random_state=self._seed + self._iteration)
+
+                # Set training and validation data
+                new_training_data = (x_new_train, y_new_train)
+                new_validation_data = (x_new_val, y_new_val)
+                self._training_data = self.concat_data(
+                    self._training_data,
+                    new_training_data)
+                self._validation_data = self.concat_data(
+                    self._validation_data,
+                    new_validation_data)
+
+                plt.scatter(*new_training_data[0].T)
+                plt.ylim((0, 1))
+                plt.xlim((0, 1))
+                plt.show()
+
+
+            else:
+                self._validation_data = self._training_data
+                self._training_data = (x_new, f_new)
 
         else:
-            print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
-            print('|'.join(
-                [""] + [("{:^" + str(len_h) + "}").format(col) for len_h, col in zip(list_len_h, cols)] + [""]))
-            print('+'.join([""] + ["-" * len_h for len_h in list_len_h] + [""]))
+            x_new = None
+        # Logging
+        if self._logging == 0:
+            # Minimum logging level.
+            self._log(n_samples=evaluation_log.n_samples,
+                      n_passing=evaluation_log.n_passing,
+                      statistic=evaluation_log.statistic,
+                      terminate=evaluation_log.terminate)
 
-    return clf
+        elif self._logging == 1:
+            self._log(n_samples=evaluation_log.n_samples,
+                      n_passing=evaluation_log.n_passing,
+                      statistic=evaluation_log.statistic,
+                      terminate=evaluation_log.terminate,
+                      rel_error=rel_error,
+                      it_sample=x_new,
+                      importance=importance,
+                      hopt=hopt,
+                      cumulative=cumulative,
+                      delta=self.delta,
+                      epsilon=self.epsilon,
+                      hyperparams=self.meta_model.hyper_params)
+            # self._log()
+        elif self._logging == 2:
+            raise NotImplementedError
+            # self._log(n_samples=evaluation_log.n_samples,
+            #           n_passing=evaluation_log.n_passing,
+            #           statistic=evaluation_log.statistic,
+            #           terminate=evaluation_log.terminate,
+            #           rel_error=rel_error,
+            #           it_sample=x_new))
+            # self._log()
+        else:
+            raise RuntimeError("Logging argument not recognised.")
+
+    def iterate_to_confidence(self, cumulative=False, importance="error",
+                              tdmq=False, verbose=False, hopt=False, clip=1e-8,
+                              v=3):
+
+        self._algorithm_settings = dict(cumulative=cumulative,
+                                        importance=importance,
+                                        tdmq=tdmq,
+                                        verbose=verbose, hopt=hopt, clip=clip,
+                                        v=v)
+
+        while not self.terminate:
+            self.iterate(cumulative=cumulative, importance=importance,
+                         tdmq=tdmq, verbose=verbose, hopt=hopt, clip=clip, v=v)
 
 
 if __name__ == "__main__":
-    ssifl(0.1, 0.001, F2D[0], 2, optimize_hp=True)
+    # t = SSIFL(lambda x: 1)
+    #
+    # for i in t:
+    #     print(i)
+
+    # d = DynamicLogger()
+    # for i in range(10):
+    #     d(t1=1 + i, t2=2 + i, t3=3 + i)
+    #
+    #     if i == 8:
+
+    #         d(t1=1 + i, t2=2 + i, t3=3 + i)
+
+    # print(len(d[-1]))
+
+    # print(d[4])
+
+    from src.surrogate.meta_models import SupportVectorRegression as svr
+    from src.surrogate.test import TestFunctionSet2DInputSpace as F2D
+    from sklearn.preprocessing import MinMaxScaler
+
+    scaler = MinMaxScaler()
+
+    F2D = F2D()
+
+    test = SSIFL(func=F2D[9],
+                 x_dim=2,
+                 meta_model=svr(),
+                 delta=0.001,
+                 epsilon=0.05,
+                 verbose=True,
+                 scaler=scaler)
+
+    test.iterate_to_confidence(cumulative=True, verbose=10,
+                               importance="error")
+
+    # Sample initial design of experiments using CVT.
+    x_test = test.sample(10000,
+                         "halton", seed=1, tdmq=False,
+                         verbose=False)
+
+    # Evaluate the experiments.
+    f_test = test.func(*x_test.T)
+
+    print(test.pacc_evaluate(
+        test.scaler.transform(f_test.reshape(-1, 1)).flatten(),
+        test.meta_model.predict(x_test),
+        test.epsilon,
+        test.delta
+    )
+    )

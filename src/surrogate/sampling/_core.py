@@ -7,7 +7,7 @@ from ._sampling import _multivariate_normal
 from ._sampling import _cvt
 
 
-def uniform_grid(bounds, n_sample, flatten=True, edges=False, form="sx"):
+def uniform_grid(bounds, n_sample, flatten=True, edges=False, form="sx", **kwargs):
     """Uniform Grid (UG).
     Uniform grid (UG) is the simplest sampling method in which the samples are created using node points at fixed
     intervals uniformly distributed for every dimension.
@@ -24,7 +24,8 @@ def uniform_grid(bounds, n_sample, flatten=True, edges=False, form="sx"):
     return _uniform_grid(bounds, n_sample, flatten, edges, form)
 
 
-def full_factorial(bounds, n_sample_tuple, flatten=True, edges=True, form="sx"):
+def full_factorial(bounds, n_sample_tuple, flatten=True, edges=True,
+                   form="sx", **kwargs):
     """ Custom Grid (CG).
     This Grid method is the sample as the UG method, but allows for non-uniform grid sampling.
 
@@ -40,7 +41,7 @@ def full_factorial(bounds, n_sample_tuple, flatten=True, edges=True, form="sx"):
     return _full_factorial(bounds, n_sample_tuple, flatten, edges, form)
 
 
-def halton(bounds, n_sample, form="sx"):
+def halton(bounds, n_sample, form="sx", **kwargs):
     """
 
     :param bounds:
@@ -64,7 +65,7 @@ def multivariate_normal(mean, covariance, n_sample, seed=None, form="sx"):
     return _multivariate_normal(mean, covariance, n_sample, seed, form)
 
 
-def random_uniform(bounds, n_sample, seed=None, form="sx"):
+def random_uniform(bounds, n_sample, seed=None, form="sx", **kwargs):
     """
 
     :param bounds:
@@ -76,7 +77,9 @@ def random_uniform(bounds, n_sample, seed=None, form="sx"):
     return _random_uniform(bounds, n_sample, seed, form)
 
 
-def cvt(xdim, gdim, initialize, sample, sample_num, iterations, seed=None, form="sx"):
+def cvt(xdim, gdim, initialize=halton, sample=random_uniform, sample_num=1000,
+        iterations=5, seed=None,
+        form="sx", **kwargs):
     """
 
     :param xdim:
@@ -89,7 +92,8 @@ def cvt(xdim, gdim, initialize, sample, sample_num, iterations, seed=None, form=
     :param form:
     :return:
     """
-    return _cvt(xdim, gdim, initialize, sample, sample_num, iterations, seed, form)
+    return _cvt(xdim, gdim, initialize, sample, sample_num, iterations, seed,
+                form)
 
 
 if __name__ == "__main__":

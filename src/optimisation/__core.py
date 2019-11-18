@@ -30,8 +30,8 @@ class GlobalOptimisation:
 
     @classmethod
     def ihs(cls, gen=100, phmcr=0.85, ppar_min=0.35, ppar_max=0.99, bw_min=1E-5, bw_max=1., seed=1):
-        return pg.algorithm(gen=gen, phmcr=phmcr, ppar_min=ppar_min, ppar_max=ppar_max, bw_min=bw_min, bw_max=bw_max,
-                            seed=seed)
+        return pg.algorithm(pg.ihs(gen=gen, phmcr=phmcr, ppar_min=ppar_min, ppar_max=ppar_max, bw_min=bw_min, bw_max=bw_max,
+                            seed=seed))
 
 
 class OptimisationRoutine:
