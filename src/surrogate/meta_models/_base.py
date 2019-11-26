@@ -169,7 +169,7 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
         if validation_data:
             def _objective(**decision_params):
                 if self._model:
-                    pre_model = self.copy_model(self._model)
+                    pre_model = self.copy_model(self._model, x=x, y=y)
                 else:
                     pre_model = None
                 # Use validation data provided directly.
@@ -185,7 +185,7 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
         elif method == "LOOCV":
             def _objective(**decision_params):
                 if self._model:
-                    pre_model = self.copy_model(self._model)
+                    pre_model = self.copy_model(self._model, x=x, y=y)
                 else:
                     pre_model = None
                 # Split given x, y into training and validation data.
@@ -211,7 +211,7 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
             # more robust).
             def _objective(**decision_params):
                 if self._model:
-                    pre_model = self.copy_model(self._model)
+                    pre_model = self.copy_model(self._model, x=x, y=y)
                 else:
                     pre_model = None
                 kf = KFold(n_splits=n_splits, shuffle=shuffle,
@@ -221,7 +221,7 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
                     x_train, x_test = x[train_index], x[test_index]
                     y_train, y_test = y[train_index], y[test_index]
                     fit_options["validation_data"] = (x_test, y_test)
-                    post_model, _ = self._fit(
+                    post_model, trainer = self._fit(
                         x_train, y_train, pre_model,
                         **decision_params,
                         **fit_options)
@@ -329,7 +329,7 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
         # Fit the final optimised parameters.
         self.fit(x, y, **fit_options)
 
-    def copy_model(self, model):
+    def copy_model(self, model, **kwargs):
         """
 
         Parameters

@@ -117,8 +117,7 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
     @staticmethod
     def architecture_hyperparameters(hyperparameters):
         return {
-            "x_dim": hyperparameters["x_dim"],
-            "f_dim": hyperparameters["f_dim"],
+
             "dropout_rate": hyperparameters["dropout_rate"],
             "activation": hyperparameters["activation"],
             "n_hidden_layers": hyperparameters["n_hidden_layers"],
@@ -175,10 +174,13 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
     #         pass
     #     return self._model
 
-    def copy_model(self, model):
+    def copy_model(self, model, **kwargs):
+        x_dim = len(kwargs["x"].T)
+        f_dim = 1
         state_dict = model.state_dict()
         copied_model = self._model_cls(
-            self.architecture_hyperparameters(self.hyperparameters))
+            {**dict(x_dim=x_dim, f_dim=f_dim),
+             **self.architecture_hyperparameters(self.hyperparameters)})
         copied_model.load_state_dict(state_dict)
         return copied_model
 
