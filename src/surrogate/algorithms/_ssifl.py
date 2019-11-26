@@ -511,15 +511,13 @@ class SSIFL(BaseIncrementalFunctionLearning):
                                          validation_data=self._validation_data,
                                          # score_function=self.model_score,
                                          reset=False,
-                                         verbose=verbose,
-                                         tdmq=tdmq)
+                                         verbose=verbose)
 
         else:
             self.meta_model.fit(*self._training_data,
                                 validation_data=self._validation_data,
                                 reset=False,
-                                verbose=verbose,
-                                tdmq=tdmq)
+                                verbose=verbose)
 
         # Evaluate the model according to the PACC framework.
         evaluation_log, rel_error = self.pacc_evaluate(
