@@ -124,7 +124,7 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
     def __str__(self):
         return "Feed Forward Neural Network Regression (FFNNR)"
 
-    def __init__(self, static_params={}, nn_module=SimpleRectangularNN):
+    def __init__(self, static_params={}, nn_module=SimpleResidualNN):
         super().__init__(routines=DEFAULT_FFNNR_ROUTINES,
                          hyperparams_default=DEFAULT_FFNNR_PARAMS,
                          hyperparams_static=static_params)
