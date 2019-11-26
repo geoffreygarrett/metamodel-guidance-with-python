@@ -21,8 +21,9 @@ DEFAULT_FFNNR_PARAMS = {
     "dropout_rate": 1e-3,
     "learning_rate": 1e-4,
     "batch_size": 64,
+
     # "batch_size_fraction": 0.05,
-    "num_epochs": 5000,
+    "num_epochs": 500,
     "early_stopping": LutzPrecheltEarlyStopping(10, criteria=(("PQ", 1.5),)),
     'optimizer': torch.optim.Adam,
     'criterion': torch.nn.modules.loss.MSELoss,
@@ -33,24 +34,17 @@ DEFAULT_FFNNR_ROUTINES = dict(
     initial=[
         {
             # Architecture optimisation.
-            "integer__n_hidden_layers": (2, 6),
+            "integer__n_hidden_layers": (1, 3),
             "integer__n_hidden_neurons": (50, 1000),
             "real__dropout_rate": (1e-4, 1e-2),
+            "integer__batch_size": (50, 200),
             "categorical__activation": ["leaky_relu", "sigmoid"],
             "_function__learning_rate": 1e-4,
-            "_function__batch_size": 64,
             "_function__early_stopping":
-                LutzPrecheltEarlyStopping(5, criteria=(("PQ", 0.75),)),
+                LutzPrecheltEarlyStopping(10, criteria=(("PQ", 0.6),)),
             "_optimiser__name": "gp_minimize",
-            "_optimiser__kwargs": {"n_calls": 25}
+            "_optimiser__kwargs": {"n_calls": 15}
         },
-        {
-            # Training learning rate optimisation.
-            "real__learning_rate": (1e-5, 5e-2),
-            "_function__early_stopping":
-                LutzPrecheltEarlyStopping(5, criteria=(("PQ", 0.75),))
-        },
-
     ],
     intermediate=[
         {
