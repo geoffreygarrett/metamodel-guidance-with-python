@@ -184,6 +184,29 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
         copied_model.load_state_dict(state_dict)
         return copied_model
 
+    def fit(self, x, y, **options):
+        """
+        Fits the data given the current default -> global static
+        hyperparameters.
+
+        Parameters
+        ----------
+        x
+        y
+        options
+
+        Returns
+        -------
+
+        """
+        hyperparameters = self.hyperparameters
+        hyperparameters["early_stopping"] = None
+        hyperparameters["num_epochs"] = 2000
+        self._model, self._trainer = self._fit(x, y,
+                                               model=self._model,
+                                               **hyperparameters,
+                                               **options)
+
     def _score(self, model, x, y, sample_weight=None, trainer=None):
         model.eval()
         with torch.no_grad():
