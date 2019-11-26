@@ -109,7 +109,7 @@ class SimpleResidualNN(nn.Module):
               nn.BatchNorm1d(n_hidden_neurons)]
         )
         self.fc_center = nn.Sequential(
-            [ResidualBlock(n_hidden_neurons, activation)] * int(
+            *[ResidualBlock(n_hidden_neurons, activation)] * int(
                 n_hidden_layers - 1))
         self.fc_out = RegressionOutput(n_hidden_neurons, fdim)
 
