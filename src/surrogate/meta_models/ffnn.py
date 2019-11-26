@@ -19,6 +19,7 @@ class SimpleRectangularNN(nn.Module):
         n_hidden_layers = model_params["n_hidden_layers"]
         n_hidden_neurons = model_params["n_hidden_neurons"]
         super().__init__()
+        
         self.fc_in = nn.Sequential(
             *[nn.Linear(Xdim, n_hidden_neurons),
               activation_dict[activation],
@@ -30,7 +31,7 @@ class SimpleRectangularNN(nn.Module):
               activation_dict[activation],
               nn.Dropout(dropout_rate),
               nn.BatchNorm1d(n_hidden_neurons)
-              ] * int(n_hidden_layers - 2)
+              ] * int(n_hidden_layers - 1)
         )
         self.fc_out = RegressionOutput(n_hidden_neurons, fdim)
 
@@ -55,24 +56,23 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
             "dropout_rate": 1e-3,
             "learning_rate": 1e-4,
             "n_hidden_layers": 3,
-            "n_hidden_neurons": 600,
+            "n_hidden_neurons": 500,
             "batch_size": None,
             "batch_size_fraction": 0.05,
-            "num_epochs": 400,
+            "num_epochs": 5000,
             "early_stopping": LutzPrecheltEarlyStopping(5,
                                                         criteria=(
                                                             ("PQ", 0.75),))
         }
         self._hyper_param_space = {
-            # "categorical__learning_rate": ([1e-4, 1e-3, 1e-2],),
-            "real__learning_rate": (1e-4, 1e-2),
+            "categorical__learning_rate": ([5e-3, 1e-3, 5e-4, 1e-4, 5e-5, 1e-5, 5e-6],),
             "real__batch_size_fraction": (0.01, 0.20),
         }
         self._structure_hyper_param_space = {
             "categorical__activation": (['relu', 'leaky_relu', 'sigmoid'],),
             "real__dropout_rate": (1e-4, 5e-2),
-            "integer__n_hidden_layers": (3, 10),
-            "integer__n_hidden_neurons": (100, 300),
+            "integer__n_hidden_layers": (1, 3),
+#             "integer__n_hidden_neurons": (100, 300),
         }
 
         self._hyper_param = {}

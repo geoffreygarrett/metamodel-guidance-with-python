@@ -14,36 +14,29 @@ class SurrogateModelBaseRegression:
             "real": skopt.space.Real,
             "categorical": skopt.space.Categorical}
 
-        self._hyper_params = {}
         self._default_params = {}
         self._static_params = {}
+        self._hyper_parameters_level_1 = {} # requires model reset.
+        self._hyper_parameters_level_2 = {} 
 
-        self._hyper_param_space = None
-        self._structure_hyper_param_space = None
+        self._hyper_parameter_level_1_space = None
+        self._hyper_parameter_level_2_space = None
 
         self._trainer = None
         self._model_cls = None
         self._model = None
 
-        self._x_hp_evaluated = []
-        self._f_hp_evaluated = []
+        self._x_hp_evaluated = {"level1":[], "level2":[]}
+        self._f_hp_evaluated = {"level2":[], "level2":[]}
 
     @classmethod
     def new(cls):
         new_cls = cls()
         return new_cls
 
-    # def copy(self):
-    #     temp_model = self._model
-    #     self._model = None
-    #     copy_class = deepcopy(self)
-    #     copy_class._model = temp_model
-    #     self._model = temp_model
-    #     return copy_class
-
-    def hyper_params_x(self, x):
+    def hp_dict(self, space, x):
         new_keys = []
-        for key in self._hyper_param_space.keys():
+        for key in space.keys():
             new_keys.append(key.split("__")[-1])
         return dict(zip(new_keys, x))
 
@@ -60,11 +53,11 @@ class SurrogateModelBaseRegression:
 
     @property
     def hyper_params(self):
-        return self._hyper_params
-
-    @hyper_params.setter
-    def hyper_params(self, x):
-        self._hyper_params = x
+        if self._model is None:
+            return {**self._hyper_parameters_level_1,
+                    **self._hyper_parameters_level_2}
+        else:
+            return self._hyper_parameters_level_2
 
     @property
     def default_params(self):
@@ -81,8 +74,37 @@ class SurrogateModelBaseRegression:
     @property
     def all_params(self):
         return {**self.default_params,
+                **self.structure_params,
                 **self.hyper_params,
                 **self.static_params}
+    
+    @property
+    def hp_structure_keys(self):
+        new_keys = []
+        for key in self._structure_hyper_param_space.keys():
+            new_keys.append(key.split("__")[-1])
+        return new_keys
+    
+    @property
+    def hp_tunable(self):
+        new_keys = []
+        for key in self._hyper_param_space.keys():
+            new_keys.append(key.split("__")[-1])
+        return new_keys
+    
+    def hyper_params_x(self, x):
+        new_keys = []
+        for key in self._hyper_param_space.keys():
+            new_keys.append(key.split("__")[-1])
+        if len(x)>len(self._hyper_param_space.keys()):
+            for key in self._structure_hyper_param_space.keys():
+                new_keys.append(key.split("__")[-1])
+        return dict(zip(new_keys, x))
+
+    
+    def set_hyper_params_from_results(self, results):
+        self._hyper_params 
+        
 
     def space(self, params):
         _space = []
@@ -115,12 +137,11 @@ class SurrogateModelBaseRegression:
                 "Either base used, which has no model attribute, or default .fit method doesn't exist for model."
             )
 
-    @property
-    def best_hyper_params(self, n=3):
+    def best_hyper_params(self, type_opt, n=3):
         x0_ = None
         ybest = None
-        x0 = self._x_hp_evaluated if len(self._x_hp_evaluated) > 0 else None
-        y0 = self._f_hp_evaluated if len(self._f_hp_evaluated) > 0 else None
+        x0 = self._x_hp_evaluated[type_opt] if len(self._x_hp_evaluated[type_opt]) > 0 else None
+        y0 = self._f_hp_evaluated[type_opt] if len(self._f_hp_evaluated[type_opt]) > 0 else None
         if x0 is not None and y0 is not None:
             y0 = np.array(y0)
             ybest = np.argsort(y0)[:n]
@@ -128,20 +149,28 @@ class SurrogateModelBaseRegression:
         return x0_, ybest
 
     def fit_optimise(self, x_train, y_train, x_test, y_test,
-                     score_function, reset=False, n_calls=15,
+                     score_function, reset=False, n_calls=30,
                      n_random_starts=5, verbose=False, tdmq=False,
                      early_stopping=None):
-        if reset:
+        
+        self.static_params["x_dim"] = len(x_train.T)
+        self.static_params["f_dim"] = 1
+        
+        if not self._model or reset:  # Then level 1 hyper parameter optimisation.
+            type_opt = "reset"
             self.reset_model()
-            space = self.space({**self._hyper_param_space,
-                                **self._structure_hyper_param_space})
-        else:
-            space = self.space(self._hyper_param_space)
+            space = self.space({**self._hyper_parameters_level_1,
+                                **self._hyper_parameters_level_2})
 
+        else:
+            type_opt = "tuning"
+            space = self.space(self._hyper_param_space)
         checkpoint = None
         try:
-            checkpoint = self._model.state_dict()
+            checkpoint = self.model.state_dict()
         except AttributeError:
+            print(self._model)
+            print("no checkpoint")
             pass
 
         @skopt.utils.use_named_args(space)
@@ -149,7 +178,7 @@ class SurrogateModelBaseRegression:
             model_handle = self.new()
             model_handle.static_params = self.static_params
             try:
-                model_handle._model.load_state_dict(checkpoint)
+                model_handle.model.load_state_dict(checkpoint)
             except AttributeError:
                 print("yo mamam!")
                 pass
@@ -159,8 +188,8 @@ class SurrogateModelBaseRegression:
             # return score_function(model_handle)
             return -model_handle.score(x_test, y_test)
 
-        if self.best_hyper_params[0] is not None:
-            total = n_calls - len(self.best_hyper_params[0])
+        if self.best_hyper_params(type_opt)[0] is not None:
+            total = n_calls - len(self.best_hyper_params(type_opt)[0])
         else:
             total = n_calls
         progress = TQDMSkoptCallable(total=total, desc="Model HpOpt",
@@ -169,11 +198,11 @@ class SurrogateModelBaseRegression:
                                     n_calls=n_calls,
                                     callback=[progress],
                                     n_random_starts=n_random_starts,
-                                    x0=self.best_hyper_params[0])
+                                    x0=self.best_hyper_params(type_opt)[0])
 
-        self._x_hp_evaluated.append(results.x)
-        self._f_hp_evaluated.append(results.fun)
-        self._hyper_params = self.hyper_params_x(results.x)
+        self._x_hp_evaluated[type_opt].append(results.x)
+        self._f_hp_evaluated[type_opt].append(results.fun)
+        self.set_hyper_params_from_results(results.x)
         self.fit(x_train, y_train, x_test, y_test,
                  reset=reset, verbose=verbose, tdmq=tdmq, early_stopping=False)
 

@@ -42,6 +42,8 @@ class SupportVectorRegression(SurrogateModelBaseRegression):
             "real__epsilon": (0.001, 1e-1)
             # "real__epsilon": (0.001, 1e-1)
         }
+        
+        self._structure_hyper_param_space = {}
         self._static_params = static_params
         self._hyper_params = {}
         self._model_cls = _model_cls_

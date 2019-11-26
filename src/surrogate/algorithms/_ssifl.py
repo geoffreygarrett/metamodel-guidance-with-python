@@ -555,7 +555,7 @@ class SSIFL(BaseIncrementalFunctionLearning):
                     with_error_array=True)
                 if clip is not False:
                     p = np.where(rel_error >= self.epsilon, rel_error ** v,
-                                 clip),
+                                 clip)
                 else:
                     p = rel_error ** v
                 mapping = InterpolatedMarginalInverseECDF(
