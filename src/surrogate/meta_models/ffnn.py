@@ -35,10 +35,10 @@ DEFAULT_FFNNR_ROUTINES = dict(
         {
             # Architecture optimisation.
             "integer__n_hidden_layers": (1, 3),
-            "integer__n_hidden_neurons": (100, 1000),
+            "integer__n_hidden_neurons": (600, 1000),
             "real__dropout_rate": (1e-4, 1e-2),
             "integer__batch_size": (100, 300),
-            "real__learning_rate": (1e-5, 5e-2),
+            "real__learning_rate": (1e-6, 5e-4),
             # "categorical__activation": ["leaky_relu", "sigmoid"],
             "_function__learning_rate": 1e-4,
             "_function__early_stopping":
@@ -50,7 +50,7 @@ DEFAULT_FFNNR_ROUTINES = dict(
     intermediate=[
         {
             # Training learning rate optimisation.
-            "real__learning_rate": (1e-5, 5e-2),
+            "real__learning_rate": (1e-6, 5e-4),
             "_function__early_stopping":
                 LutzPrecheltEarlyStopping(5, criteria=(("PQ", 2.0),))
         },
