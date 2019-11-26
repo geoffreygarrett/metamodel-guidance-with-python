@@ -613,10 +613,10 @@ class SSIFL(BaseIncrementalFunctionLearning):
                     self._validation_data,
                     new_validation_data)
 
-                plt.scatter(*new_training_data[0].T)
-                plt.ylim((0, 1))
-                plt.xlim((0, 1))
-                plt.show()
+                # plt.scatter(*new_training_data[0].T)
+                # plt.ylim((0, 1))
+                # plt.xlim((0, 1))
+                # plt.show()
 
 
             else:
