@@ -117,6 +117,8 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
     @staticmethod
     def architecture_hyperparameters(hyperparameters):
         return {
+            "x_dim": hyperparameters["x_dim"],
+            "f_dim": hyperparameters["f_dim"],
             "dropout_rate": hyperparameters["dropout_rate"],
             "activation": hyperparameters["activation"],
             "n_hidden_layers": hyperparameters["n_hidden_layers"],
