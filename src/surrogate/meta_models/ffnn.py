@@ -18,7 +18,7 @@ DEFAULT_FFNNR_PARAMS = {
     "n_hidden_neurons": 500,
 
     # Training.
-    "dropout_rate": 1e-3,
+    "dropout_rate":0.0,
     "learning_rate": 1e-4,
     "batch_size": 64,
 
@@ -36,7 +36,7 @@ DEFAULT_FFNNR_ROUTINES = dict(
             # Architecture optimisation.
             "integer__n_hidden_layers": (1, 3),
             # "integer__n_hidden_neurons": (600, 1000),
-            "real__dropout_rate": (1e-4, 1e-2),
+            # "real__dropout_rate": (1e-4, 1e-2),
             "integer__batch_size": (70, 300),
             "real__learning_rate": (1e-6, 5e-4),
             # "categorical__activation": ["leaky_relu", "sigmoid"],
