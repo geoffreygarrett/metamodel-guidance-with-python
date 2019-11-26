@@ -439,10 +439,10 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
         -------
 
         """
-        try:
-            return model.predict(x)
-
-        except AttributeError:
-            raise NotImplementedError(
-                "Either base used, which has no model attribute, or "
-                "default .predict method doesn't exist for model.")
+        # try:
+        return model.predict(x)
+        #
+        # except AttributeError:
+        #     raise NotImplementedError(
+        #         "Either base used, which has no model attribute, or "
+        #         "default .predict method doesn't exist for model.")
