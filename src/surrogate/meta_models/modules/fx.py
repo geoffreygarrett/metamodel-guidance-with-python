@@ -24,7 +24,7 @@ class ResidualBlock(BaseResidualBlock):
 
     def __init__(self, hidden_size, activation="relu"):
         super().__init__(hidden_size, hidden_size, activation=activation)
-        self.shortcut = nn.BatchNorm2d(hidden_size)
+        self.shortcut = nn.BatchNorm1d(hidden_size)
         self.blocks = nn.Sequential(
             nn.Linear(in_features=hidden_size, out_features=hidden_size),
             self.activation,
