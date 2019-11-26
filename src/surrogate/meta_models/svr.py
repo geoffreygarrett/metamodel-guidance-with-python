@@ -53,7 +53,7 @@ class SupportVectorRegression(SurrogateModelBaseRegression):
     def __str__(self):
         return "Support Vector Regression (sklearn.svm.SVR)"
 
-    def copy_model(self, model, *kwargs):
+    def copy_model(self, model, **kwargs):
         """
 
         Parameters
