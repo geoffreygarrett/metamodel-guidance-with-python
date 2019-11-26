@@ -335,7 +335,7 @@ class SSIFL(BaseIncrementalFunctionLearning):
 
     def __init__(self, func, x_dim, meta_model, delta, epsilon,
                  sample_num=s_num_diego, sample_idx=s_idx_diego, scaler=None,
-                 test_frac=0.2, seed=42, logging=0,
+                 test_frac=0.2, seed=42, logging=0, maxiter=-1,
                  **kwargs):
         """
         Parameters
@@ -394,6 +394,7 @@ class SSIFL(BaseIncrementalFunctionLearning):
                          scaler, test_frac, seed=seed,
                          logging=logging)
 
+        self._maxiter = maxiter
         self._algorithm_settings = dict(
             cumulative=kwargs.pop("cumulative", True),
             importance=kwargs.pop("importance", "error"),
@@ -527,6 +528,12 @@ class SSIFL(BaseIncrementalFunctionLearning):
             epsilon=self.epsilon,
             with_error_array=True)
         self._terminate = evaluation_log.terminate
+
+        if self._iteration >= self._maxiter:
+            if self._maxiter != -1:
+                pass
+            else:
+                self._terminate = True
 
         if verbose:
             # Print headers if verbose.
