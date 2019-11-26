@@ -42,8 +42,9 @@ class RandomForestRegression(SurrogateModelBaseRegression):
             "random_state": None,
             "verbose": 0,
             "warm_start": False}
-        self._hyper_params = {
+        self._hyper_param_space = {
             "integer__n_estimators": (10, 5000)
         }
+        self._structure_hyper_param_space = {}
         self._static_params = static_params
         self._model_cls = _model_cls_

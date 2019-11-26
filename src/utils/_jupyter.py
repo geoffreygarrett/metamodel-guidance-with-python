@@ -34,3 +34,4 @@ class TQDMSkoptCallable(object):
         """
         self._bar.close()
         self._bar.clear()
+

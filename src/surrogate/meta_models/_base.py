@@ -1,210 +1,375 @@
 import skopt
+from src.dataset import DataSetFX
 from sklearn.externals import joblib
+from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
 from copy import deepcopy
 from src.utils import TQDMSkoptCallable
 import numpy as np
 import torch
+from src.optimisation.routines import SciKitOptOptimiserRoutine
 
 
-class SurrogateModelBaseRegression:
+class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
 
-    def __init__(self):
-        self._skopt_space_mapping = {
-            "integer": skopt.space.Integer,
-            "real": skopt.space.Real,
-            "categorical": skopt.space.Categorical}
-
-        self._hyper_params = {}
-        self._default_params = {}
-        self._static_params = {}
-
-        self._hyper_param_space = None
-        self._structure_hyper_param_space = None
-
-        self._trainer = None
-        self._model_cls = None
-        self._model = None
-
-        self._x_hp_evaluated = []
-        self._f_hp_evaluated = []
-
-    @classmethod
-    def new(cls):
-        new_cls = cls()
-        return new_cls
-
-    # def copy(self):
-    #     temp_model = self._model
-    #     self._model = None
-    #     copy_class = deepcopy(self)
-    #     copy_class._model = temp_model
-    #     self._model = temp_model
-    #     return copy_class
-
-    def hyper_params_x(self, x):
-        new_keys = []
-        for key in self._hyper_param_space.keys():
-            new_keys.append(key.split("__")[-1])
-        return dict(zip(new_keys, x))
-
-    def reset_model(self):
-        self._model = None
-
-    @property
-    def model(self):
-        if self._model is None:
-            self._model = self._model_cls(self.all_params)
-        else:
-            pass
-        return self._model
-
-    @property
-    def hyper_params(self):
-        return self._hyper_params
-
-    @hyper_params.setter
-    def hyper_params(self, x):
-        self._hyper_params = x
-
-    @property
-    def default_params(self):
-        return self._default_params
-
-    @property
-    def static_params(self):
-        return self._static_params
-
-    @static_params.setter
-    def static_params(self, x):
-        self._static_params = x
-
-    @property
-    def all_params(self):
-        return {**self.default_params,
-                **self.hyper_params,
-                **self.static_params}
-
-    def space(self, params):
-        _space = []
-        for key, value in params.items():
-            _type, _name = key.split("__")
-            _space.append(self._skopt_space_mapping[_type](*value, name=_name))
-        return _space
-
-    def fit(self, x_train, y_train, x_test=None, y_test=None, reset=False,
-            verbose=False, tdmq=False, early_stopping=None, **kwargs):
+    def __init__(self, routines=None, hyperparams_default=None,
+                 hyperparams_static=None):
         """
 
         Parameters
         ----------
-        x_train
-        y_train
-        x_test
-        y_test
-        reset
-        verbose
+        routines : dict
+        hyperparams_default :
+        hyperparams_static :
+        """
+        self._routines = routines
+        super().__init__(routines=routines,
+                         function_default=hyperparams_default)
+        hp_stat = hyperparams_static if hyperparams_static is not None else {}
+        self._global_static["function"] = hp_stat
+        self._trainer_cls = None
+        self._trainer = None
+        self._model_cls = None
+        self._model = None
+
+    @property
+    def routines(self):
+        return self._routines
+
+    @property
+    def hyperparameters(self):
+        return self._get_global_static_params()["function"]
+
+    def trainer_hyperparameters(self, hyperparameters):
+        return {}
+
+    def architecture_hyperparameters(self, hyperparameters):
+        return {}
+
+    def _fit(self, x, y, model=None, **all_params):
+        """
+        Fits the data given the current default -> global static
+        hyperparameters.
+
+        Parameters
+        ----------
+        x
+        y
+        options
 
         Returns
         -------
 
         """
-        try:
-            self.model.fit(x_train, y_train)
-        except AttributeError:
-            raise NotImplementedError(
-                "Either base used, which has no model attribute, or default .fit method doesn't exist for model."
-            )
+        # Extract options.
+        vb = all_params.pop('verbose', False)
+        reset = all_params.pop('reset', False)
+        validation_data = all_params.pop('validation_data', None)
+        hyperparameters = all_params
 
-    @property
-    def best_hyper_params(self, n=3):
-        x0_ = None
-        ybest = None
-        x0 = self._x_hp_evaluated if len(self._x_hp_evaluated) > 0 else None
-        y0 = self._f_hp_evaluated if len(self._f_hp_evaluated) > 0 else None
-        if x0 is not None and y0 is not None:
-            y0 = np.array(y0)
-            ybest = np.argsort(y0)[:n]
-            x0_ = [x0[int(yb)] for yb in ybest]
-        return x0_, ybest
-
-    def fit_optimise(self, x_train, y_train, x_test, y_test,
-                     score_function, reset=False, n_calls=15,
-                     n_random_starts=5, verbose=False, tdmq=False,
-                     early_stopping=None):
+        # Reset model if required (i.e. fresh neural network training)
         if reset:
-            self.reset_model()
-            space = self.space({**self._hyper_param_space,
-                                **self._structure_hyper_param_space})
+            model = None
+
+        if self._trainer_cls is None:
+            """Model does not require training, or inbuilt (Simple models)"""
+            if model is None:
+                model = self._model_cls(**hyperparameters)
+            model.fit(x, y)
+            trainer = None
+
         else:
-            space = self.space(self._hyper_param_space)
+            architecture_hyperparameters = self.architecture_hyperparameters(
+                hyperparameters)
+            trainer_hyperparameters = self.trainer_hyperparameters(
+                hyperparameters)
+            if model is None:
+                """Create model with architecture and train (e.g. FFNN)"""
+                model = self._model_cls(
+                    {'x_dim': len(x.T), 'f_dim': 1,
+                     **architecture_hyperparameters})
+            train_dataset = self.prepare_dataset(x, y)
+            if validation_data is not None:
+                x_val, y_val = validation_data
+                validation_dataset = self.prepare_dataset(x_val, y_val)
+            else:
+                validation_dataset = self.prepare_dataset(x, y)
+            trainer = self._trainer_cls(
+                **trainer_hyperparameters,
+                training_dataset=train_dataset,
+                validation_dataset=validation_dataset,
+                model=model,
+                PATH="models/")
+            trainer.train(verbose=vb)
+        return model, trainer
 
-        checkpoint = None
-        try:
-            checkpoint = self._model.state_dict()
-        except AttributeError:
-            pass
+    def fit(self, x, y, **options):
+        """
+        Fits the data given the current default -> global static
+        hyperparameters.
 
-        @skopt.utils.use_named_args(space)
-        def objective(**params):
-            model_handle = self.new()
-            model_handle.static_params = self.static_params
-            try:
-                model_handle._model.load_state_dict(checkpoint)
-            except AttributeError:
-                print("yo mamam!")
-                pass
-            model_handle.hyper_params = params
-            model_handle.fit(x_train, y_train, x_test, y_test,
-                             early_stopping=True)
-            # return score_function(model_handle)
-            return -model_handle.score(x_test, y_test)
+        Parameters
+        ----------
+        x
+        y
+        options
 
-        if self.best_hyper_params[0] is not None:
-            total = n_calls - len(self.best_hyper_params[0])
+        Returns
+        -------
+
+        """
+        self._model, self._trainer = self._fit(x, y,
+                                               model=self._model,
+                                               **self.hyperparameters,
+                                               **options)
+
+    def make_objective(self, x, y, **options):
+        """
+
+        Parameters
+        ----------
+        x : ndarray
+        y : ndarray
+
+        options
+            - validation_data : tuple of ndarray, optional
+            - method : str, optional
+            - verbose : bool, optional
+            - reset : bool, optional
+
+            * Cross-validation
+                - test_size :
+                - random_state :
+                - stratify :
+                - shuffle :
+                - n_splits :
+
+        Returns
+        -------
+
+        """
+        # Extract relevant options in the scope of make_objective.
+        method = options.pop('method', 'LOOCV')
+        validation_data = options.pop('validation_data', None)
+
+        # Cross-validation optional parameters.
+        test_size = options.pop('test_size', 0.2)
+        random_state = options.pop('random_state', None)
+        stratify = options.pop('stratify', None)
+        shuffle = options.pop('shuffle', True)
+        n_splits = options.pop('n_splits', 5)
+
+        # Create options pertaining to to ._fit method.
+        fit_options = dict(
+            reset=options.pop('reset', False),
+            verbose=options.pop('verbose', False),
+            validation_data=validation_data)
+
+        # Use leave one out cross-validation with provided validation.
+        if validation_data:
+            def _objective(**decision_params):
+                if self._model:
+                    pre_model = self.copy_model(self._model)
+                else:
+                    pre_model = None
+                # Use validation data provided directly.
+                post_model, trainer = self._fit(
+                    x, y, pre_model,
+                    **decision_params,
+                    **fit_options)
+                x_test, y_test = fit_options["validation_data"]
+                return -self._score(post_model, x_test, y_test,
+                                    trainer=trainer)
+
+        # Leave out one cross-validation.
+        elif method == "LOOCV":
+            def _objective(**decision_params):
+                if self._model:
+                    pre_model = self.copy_model(self._model)
+                else:
+                    pre_model = None
+                # Split given x, y into training and validation data.
+                (x_train, x_test,
+                 y_train, y_test) = train_test_split(x, y,
+                                                     test_size=test_size,
+                                                     random_state=random_state,
+                                                     stratify=stratify,
+                                                     shuffle=shuffle)
+
+                fit_options["validation_data"] = (x_test, y_test)
+                post_model, _ = self._fit(
+                    x_train, y_train, pre_model,
+                    **decision_params,
+                    **fit_options)
+                return -self._score(post_model, x_test, y_test,
+                                    trainer=trainer)
+
+        # K-Fold cross-validation.
+        elif method is "KFCV":
+            # Split given x, y into training and validation for KFold
+            # cross validation (Computationally expensive, although
+            # more robust).
+            def _objective(**decision_params):
+                if self._model:
+                    pre_model = self.copy_model(self._model)
+                else:
+                    pre_model = None
+                kf = KFold(n_splits=n_splits, shuffle=shuffle,
+                           random_state=random_state)
+                scores = []
+                for train_index, test_index in kf.split(x):
+                    x_train, x_test = x[train_index], x[test_index]
+                    y_train, y_test = y[train_index], y[test_index]
+                    fit_options["validation_data"] = (x_test, y_test)
+                    post_model, _ = self._fit(
+                        x_train, y_train, pre_model,
+                        **decision_params,
+                        **fit_options)
+                    scores.append(-self._score(post_model, x_test, y_test,
+                                               trainer=trainer))
+                return np.mean(scores)
+
         else:
-            total = n_calls
-        progress = TQDMSkoptCallable(total=total, desc="Model HpOpt",
-                                     leave=False)
-        results = skopt.gp_minimize(objective, space, verbose=False,
-                                    n_calls=n_calls,
-                                    callback=[progress],
-                                    n_random_starts=n_random_starts,
-                                    x0=self.best_hyper_params[0])
+            raise ValueError("Score method not recognised.")
 
-        self._x_hp_evaluated.append(results.x)
-        self._f_hp_evaluated.append(results.fun)
-        self._hyper_params = self.hyper_params_x(results.x)
-        self.fit(x_train, y_train, x_test, y_test,
-                 reset=reset, verbose=verbose, tdmq=tdmq, early_stopping=False)
+        return _objective
 
-    def score(self, X, y, sample_weight=None):
+    def optimise_hyperparameters(self, x, y, **options):
+        """
+        Optimizes the hyperparameters by splitting the provided x and y
+        arrays according to the validation score method chosen for the
+        optimisation.
+
+        Parameters
+        ----------
+        x :
+        y :
+        options
+            - validation_data : tuple of ndarray, optional
+            - method : str, optional
+            - verbose : bool, optional
+            - reset : bool, optional
+            - tdmq : bool, optional
+            - callback : list of callable, optional
+
+            * Cross-validation
+                - test_size :
+                - random_state :
+                - stratify :
+                - shuffle :
+                - n_splits :
+
+        Returns
+        -------
+
+        """
+        # Extract options pertaining to .optimise_routine() method.
+        optimise_routine_options = dict(
+            tdmq=options.pop('tdmq', False),
+            callback=options.pop('callback', False))
+
+        # Make objective function.
+        objective = self.make_objective(x, y, **options)
+
+        # Optimise hyperparameters.
+        self.optimise_routine(objective, **optimise_routine_options)
+
+    def optimise_fit(self, x, y, **options):
         """
 
-        :param X:
-        :param y:
-        :param sample_weight:
-        :return:
-        """
-        try:
-            return self.model.score(X, y, sample_weight=sample_weight)
-        except AttributeError:
-            raise NotImplementedError(
-                "Either base used, which has no model attribute, or default .score method doesn't exist for model."
-            )
+        Parameters
+        ----------
+        x
+        y
+        options
+            - validation_data : tuple of ndarray, optional
+            - method : str, optional
+            - verbose : bool, optional
+            - reset : bool, optional
+            - tdmq : bool, optional
+            - callback : list of callable, optional
 
-    def predict(self, X):
-        """
-        Method to return prediction based on input.
-        :param X:
-        :return:
-        """
-        try:
-            return self.model.predict(X)
+            * Cross-validation
+                - test_size :
+                - random_state :
+                - stratify :
+                - shuffle :
+                - n_splits :
+        Returns
+        -------
 
-        except AttributeError:
-            raise NotImplementedError(
-                "Either base used, which has no model attribute, or default .predict method doesn't exist for model."
-            )
+        """
+        # Cross-validation optional parameters.
+        cross_validation_options = dict(
+            test_size=options.pop('test_size', 0.2),
+            random_state=options.pop('random_state', None),
+            stratify=options.pop('stratify', None),
+            shuffle=options.pop('shuffle', True),
+            n_splits=options.pop('n_splits', 5))
+
+        # Extract options pertaining to .optimise_hyperparameters() method.
+        o = optimise_hyperparameters_options = dict(
+            validation_data=options.pop('validation_data', None),
+            method=options.pop('method', 'LOOCV'),
+            verbose=options.pop('verbose', False),
+            reset=options.pop('reset', False),
+            tdmq=options.pop('tdmq', False),
+            callback=options.pop('callback', False),
+            **cross_validation_options)
+
+        # Extract options pertaining to .fit() method.
+        fit_options = dict(
+            reset=options.pop('reset', False),
+            verbose=o["verbose"],
+            validation_data=o["validation_data"])
+
+        # Optimise hyperparameters.
+        self.optimise_hyperparameters(x, y, **optimise_hyperparameters_options)
+
+        # Fit the final optimised parameters.
+        self.fit(x, y, **fit_options)
+
+    def copy_model(self, model):
+        """
+
+        Parameters
+        ----------
+        model
+
+        Returns
+        -------
+
+        """
+        raise NotImplementedError("Not implemented in base class.")
+
+    def score(self, x, y, sample_weight=None, trainer=None):
+        """
+
+        Parameters
+        ----------
+        x
+        y
+        sample_weight
+
+        Returns
+        -------
+
+        """
+        return self._score(self._model, x, y, sample_weight, trainer)
+
+    def predict(self, x):
+        """
+
+        Parameters
+        ----------
+        x
+
+        Returns
+        -------
+
+        """
+
+        return self._predict(self._model, x)
 
     def save(self, path):
         """
@@ -221,3 +386,63 @@ class SurrogateModelBaseRegression:
         :return:
         """
         self._model = joblib.load(path)
+
+    @staticmethod
+    def prepare_dataset(x, y):
+        """
+
+        Parameters
+        ----------
+        x
+        y
+
+        Returns
+        -------
+
+        """
+        return DataSetFX(
+            output=y.reshape(-1, 1),
+            input=x.reshape(-1, len(x.T)))
+
+    @staticmethod
+    def _score(model, x, y, sample_weight=None, trainer=None):
+        """
+
+        Parameters
+        ----------
+        model
+        x
+        y
+        sample_weight
+
+        Returns
+        -------
+
+        """
+        try:
+            return model.score(x, y, sample_weight=sample_weight)
+        except AttributeError:
+            raise NotImplementedError(
+                "Either base used, which has no model attribute, or "
+                "default .score method doesn't exist for model.")
+
+    @staticmethod
+    def _predict(model, x):
+        """
+
+        Parameters
+        ----------
+        model
+        x
+
+        Returns
+        -------
+
+        """
+        try:
+            return model.predict(x)
+
+        except AttributeError:
+            raise NotImplementedError(
+                "Either base used, which has no model attribute, or "
+                "default .predict method doesn't exist for model.")

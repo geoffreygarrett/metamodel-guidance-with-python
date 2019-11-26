@@ -89,9 +89,105 @@ def mpl3Ddemo(x, y, z, name=None):
 
 
 import plotly.io as pio
+from src.surrogate.sampling import uniform_grid
 
 
-def plotly3Dsurf(x, y, z, name=None, show_scatter=False, renderer=None, save=False):
+def plotly3DsurfModelPerformance(model, n, scaler=None, renderer=None,
+                                 show_train_scatter=None, save=False,
+                                 name=None, path="."):
+    def vec_eval(x):
+        return model.predict(x)
+
+    data = []
+
+    bounds = np.array([[0] * n, [1] * n])
+    X = uniform_grid(bounds, 101, flatten=False)
+    X_ = uniform_grid(bounds, 101, flatten=True)
+    F = vec_eval(X_)
+
+    ds_train = [None, None]
+    if scaler:
+        y_ = scaler.inverse_transform(F.reshape(-1, 1)).reshape(101, 101)
+    else:
+        y_ = F.reshape(101, 101)
+
+    data.append(go.Surface(x=X[0], y=X[1], z=y_, colorscale='inferno'))
+    if show_train_scatter:
+        if scaler:
+            ds_train[1] = scaler.inverse_transform(
+                show_train_scatter[1].reshape(-1, 1)).flatten()
+        else:
+            ds_train[1] = show_train_scatter[1]
+        ds_train[0] = show_train_scatter[0]
+
+        data.append(go.Scatter3d(x=ds_train[0][:, 0],
+                                 y=ds_train[0][:, 1],
+                                 z=ds_train[1],
+                                 mode='markers',
+                                 marker=dict(
+                                     size=4.0,
+                                     opacity=0.7,
+                                     line=dict(width=1.5,
+                                               color='black'),
+                                     color='rgba(255,255,153,0.8)'
+                                 )))
+
+        pred_f = vec_eval(ds_train[0])
+
+        if scaler:
+            transformed_f = scaler.inverse_transform(
+                pred_f.reshape(-1, 1)).flatten()
+        else:
+            transformed_f = pred_f
+
+        # data.append(go.Scatter3d(x=ds_train[0][:, 0],
+        #                          y=ds_train[0][:, 1],
+        #                          z=transformed_f,
+        #                          mode='markers',
+        #                          marker=dict(
+        #                              size=4.0,
+        #                              opacity=0.7,
+        #                              line=dict(width=1.5,
+        #                                        color='black'),
+        #                              color='rgba(255,100,100,0.95)'
+        #                          )))
+
+        for idx in range(len(pred_f)):
+            data.append(go.Scatter3d(
+                x=np.tile(ds_train[0][:, 0][idx], (2,)),
+                y=np.tile(ds_train[0][:, 1][idx], (2,)),
+                z=np.array([transformed_f[idx], ds_train[1][idx]]),
+                mode="lines",
+                line=dict(color='rgba(255,100,100,0.8)',
+                          width=3)))
+
+    fig = go.Figure(data=data)
+
+    camera = dict(
+        # up=dict(x=0, y=0, z=-10),
+        center=dict(x=0, y=0, z=-0.20),
+        # eye=dict(x=1.25, y=1.25, z=1.25)
+    )
+
+    fig.update_layout(title=name, autosize=False,
+                      width=620, height=580,
+                      margin=dict(l=65, r=50, b=65, t=90),
+                      scene_camera=camera, showlegend=False)
+
+    fig.update_layout(scene_aspectmode='cube')
+
+    if renderer is not None:
+        # Image(pio.to_image(fig, format='png'))
+        fig.show(renderer=renderer)
+
+    else:
+        fig.show()
+    if save:
+        fig.write_image(f"{path}/{name}.pdf")
+
+
+def plotly3Dsurf(x, y, z, name=None, show_scatter=False, renderer=None,
+                 save=False, show_train_scatter=None, ):
     data = []
     data.append(go.Surface(x=x, y=y, z=z, colorscale='inferno'))
     if show_scatter:
@@ -106,6 +202,21 @@ def plotly3Dsurf(x, y, z, name=None, show_scatter=False, renderer=None, save=Fal
                                                color='black'),
                                      color='rgba(255,255,153,0.8)'
                                  )))
+
+    if show_train_scatter:
+        coords = show_train_scatter
+        data.append(go.Scatter3d(x=coords[0][:, 0],
+                                 y=coords[0][:, 1],
+                                 z=coords[1],
+                                 mode='markers',
+                                 marker=dict(
+                                     size=4.0,
+                                     opacity=0.7,
+                                     line=dict(width=1.5,
+                                               color='black'),
+                                     color='rgba(255,255,153,0.8)'
+                                 )))
+
     fig = go.Figure(data=data)
 
     camera = dict(
@@ -150,7 +261,8 @@ def map_z2color(zval, colormap, vmin, vmax):
         raise ValueError('incorrect relation between vmin and vmax')
     t = (zval - vmin) / float((vmax - vmin))  # normalize val
     R, G, B, alpha = colormap(t)
-    return 'rgb(' + '{:d}'.format(int(R * 255 + 0.5)) + ',' + '{:d}'.format(int(G * 255 + 0.5)) + \
+    return 'rgb(' + '{:d}'.format(int(R * 255 + 0.5)) + ',' + '{:d}'.format(
+        int(G * 255 + 0.5)) + \
            ',' + '{:d}'.format(int(B * 255 + 0.5)) + ')'
 
 
@@ -161,12 +273,15 @@ def plotly_trisurf(x, y, z, simplices, colormap=cm.RdBu, plot_edges=None):
     # insert here the  type check for input data
 
     points3D = np.vstack((x, y, z)).T
-    tri_vertices = map(lambda index: points3D[index], simplices)  # vertices of the surface triangles
-    zmean = [np.mean(tri[:, 2]) for tri in tri_vertices]  # mean values of z-coordinates of
+    tri_vertices = map(lambda index: points3D[index],
+                       simplices)  # vertices of the surface triangles
+    zmean = [np.mean(tri[:, 2]) for tri in
+             tri_vertices]  # mean values of z-coordinates of
     # triangle vertices
     min_zmean = np.min(zmean)
     max_zmean = np.max(zmean)
-    facecolor = [map_z2color(zz, colormap, min_zmean, max_zmean) for zz in zmean]
+    facecolor = [map_z2color(zz, colormap, min_zmean, max_zmean) for zz in
+                 zmean]
     I, J, K = tri_indices(simplices)
 
     triangles = go.Mesh3d(x=x,
@@ -184,8 +299,11 @@ def plotly_trisurf(x, y, z, simplices, colormap=cm.RdBu, plot_edges=None):
     else:
         # define the lists Xe, Ye, Ze, of x, y, resp z coordinates of edge end points for each triangle
         # None separates data corresponding to two consecutive triangles
-        lists_coord = [[[T[k % 3][c] for k in range(4)] + [None] for T in tri_vertices] for c in range(3)]
-        Xe, Ye, Ze = [reduce(lambda x, y: x + y, lists_coord[k]) for k in range(3)]
+        lists_coord = [
+            [[T[k % 3][c] for k in range(4)] + [None] for T in tri_vertices]
+            for c in range(3)]
+        Xe, Ye, Ze = [reduce(lambda x, y: x + y, lists_coord[k]) for k in
+                      range(3)]
 
         # define the lines to be plotted
         lines = go.Scatter3d(x=Xe,
@@ -197,7 +315,8 @@ def plotly_trisurf(x, y, z, simplices, colormap=cm.RdBu, plot_edges=None):
         return [triangles, lines]
 
 
-def plotly3Dtrisurf(x, y, z, name=None, show_scatter=False, renderer=None, save=False):
+def plotly3Dtrisurf(x, y, z, name=None, show_scatter=False, renderer=None,
+                    save=False):
     x = x.flatten()
     y = y.flatten()
     z = z.flatten()
@@ -226,7 +345,8 @@ def plotly3Dtrisurf(x, y, z, name=None, show_scatter=False, renderer=None, save=
     tri = Delaunay(points2D)
     simplices = tri.simplices
 
-    data += plotly_trisurf(x, y, z, simplices, colormap=cm.inferno, plot_edges=None)
+    data += plotly_trisurf(x, y, z, simplices, colormap=cm.inferno,
+                           plot_edges=None)
 
     fig = go.Figure(data=data)
 
@@ -251,6 +371,8 @@ def plotly3Dtrisurf(x, y, z, name=None, show_scatter=False, renderer=None, save=
 
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+
+
 # from sampling._dev.uninformed import grid_sample_domain
 
 

@@ -18,12 +18,14 @@ from .util import get_lr
 
 
 class Trainer:
-    def __init__(self, PATH, dataset, model=None, optimizer=None, criterion=None, batch_size=200,
+    def __init__(self, PATH, dataset, model=None, optimizer=None,
+                 criterion=None, batch_size=200,
                  num_epochs=150, learning_rate=1e-2):
         self._path = PATH
         self._dataset = dataset
         self._model = model
-        self._optimizer = optimizer(model.parameters(), lr=learning_rate) if optimizer is not None else None
+        self._optimizer = optimizer(model.parameters(),
+                                    lr=learning_rate) if optimizer is not None else None
         self._criterion = criterion()
 
         self._loss = None
@@ -35,11 +37,13 @@ class Trainer:
         self._scheduler = None
 
         # Device configuration
-        self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self._device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu')
         self._batch_size = batch_size
         self._num_epochs = num_epochs
         self._learn_rate = learning_rate
-        self._train_log = pd.DataFrame(columns=["epoch", "train_loss", "test_loss", "learning_rate"])
+        self._train_log = pd.DataFrame(
+            columns=["epoch", "train_loss", "test_loss", "learning_rate"])
         self._epoch = 0
         self._model.to(self._device)
 
@@ -123,10 +127,13 @@ class Trainer:
                     epoch_test_loss += self._loss.item()
             learning_rate = get_lr(self._optimizer)
             test_loss_item = epoch_test_loss / len(test_loader)
-            self._train_log = pd.concat([self._train_log, pd.DataFrame({"epoch": [self._epoch + 1],
-                                                                        "train_loss": [train_loss_item],
-                                                                        "test_loss": [test_loss_item],
-                                                                        "learning_rate": [learning_rate]})])
+            self._train_log = pd.concat(
+                [self._train_log, pd.DataFrame({"epoch": [self._epoch + 1],
+                                                "train_loss": [
+                                                    train_loss_item],
+                                                "test_loss": [test_loss_item],
+                                                "learning_rate": [
+                                                    learning_rate]})])
             if self._scheduler:
                 self._scheduler.step()
 
@@ -149,8 +156,10 @@ class Trainer:
         load_checkpoint(self, PATH)
 
     def save_checkpoint(self):
-        self._train_log.to_csv(os.path.join(self._path, "train_log.csv"), index=False)
-        save_checkpoint(self._path, self._epoch, self._model, self._optimizer, self._loss)
+        self._train_log.to_csv(os.path.join(self._path, "train_log.csv"),
+                               index=False)
+        save_checkpoint(self._path, self._epoch, self._model, self._optimizer,
+                        self._loss)
 
 
 class Trainer2:
@@ -208,17 +217,20 @@ class Trainer2:
 
         # Load components of the training.
         self._model = model
-        self._optimizer = optimizer(model.parameters(), lr=learning_rate) if optimizer is not None else None
+        self._optimizer = optimizer(model.parameters(),
+                                    lr=learning_rate) if optimizer is not None else None
         self._criterion = criterion()
         self._loss = None
         self._scheduler = None
 
         # Device configuration
-        self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self._device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu')
         self._batch_size = batch_size
         self._num_epochs = num_epochs
         self._learning_rate = learning_rate
-        self._train_log = pd.DataFrame(columns=["epoch", "train_loss", "test_loss", "learning_rate"])
+        self._train_log = pd.DataFrame(
+            columns=["epoch", "train_loss", "test_loss", "learning_rate"])
         self._epoch = 0
         self._model.to(self._device)
 
@@ -268,12 +280,18 @@ class Trainer2:
 
         rt_ax[0].plot(epoch_series, train_loss_series, label="Train loss")
         rt_ax[0].plot(epoch_series, test_loss_series, label="Test loss")
-        rt_ax[0].plot(epoch_series, validation_loss_series, label="Validation loss")
+        rt_ax[0].plot(epoch_series, validation_loss_series,
+                      label="Validation loss")
         rt_ax[0].legend()
 
-        rt_ax[1].plot(epoch_series[-500:], train_loss_series[-500:].rolling(100).mean(), label="Train loss")
-        rt_ax[1].plot(epoch_series[-500:], test_loss_series[-500:].rolling(100).mean(), label="Test loss (M10)")
-        rt_ax[1].plot(epoch_series[-500:], validation_loss_series[-500:].rolling(100).mean(),
+        rt_ax[1].plot(epoch_series[-500:],
+                      train_loss_series[-500:].rolling(100).mean(),
+                      label="Train loss")
+        rt_ax[1].plot(epoch_series[-500:],
+                      test_loss_series[-500:].rolling(100).mean(),
+                      label="Test loss (M10)")
+        rt_ax[1].plot(epoch_series[-500:],
+                      validation_loss_series[-500:].rolling(100).mean(),
                       label="Validation loss (M10)")
         rt_ax[1].legend()
 
@@ -369,7 +387,8 @@ class Trainer2:
                     epoch_validation_loss += loss.item()
 
             # POST VALIDATION
-            validation_loss_item = epoch_validation_loss / len(validation_loader)
+            validation_loss_item = epoch_validation_loss / len(
+                validation_loader)
 
             # ██████╗  ██████╗ ███████╗████████╗    ███████╗██████╗  ██████╗  ██████╗██╗  ██╗
             # ██╔══██╗██╔═══██╗██╔════╝╚══██╔══╝    ██╔════╝██╔══██╗██╔═══██╗██╔════╝██║  ██║
@@ -379,11 +398,16 @@ class Trainer2:
             # ╚═╝      ╚═════╝ ╚══════╝   ╚═╝       ╚══════╝╚═╝      ╚═════╝  ╚═════╝╚═╝  ╚═╝
             # LOGGING.
             learning_rate = get_lr(self._optimizer)
-            self._train_log = pd.concat([self._train_log, pd.DataFrame({"epoch": [self._epoch + 1],
-                                                                        "train_loss": [train_loss_item],
-                                                                        "test_loss": [test_loss_item],
-                                                                        "validation_loss": [validation_loss_item],
-                                                                        "learning_rate": [learning_rate]})], sort=False)
+            self._train_log = pd.concat(
+                [self._train_log, pd.DataFrame({"epoch": [self._epoch + 1],
+                                                "train_loss": [
+                                                    train_loss_item],
+                                                "test_loss": [test_loss_item],
+                                                "validation_loss": [
+                                                    validation_loss_item],
+                                                "learning_rate": [
+                                                    learning_rate]})],
+                sort=False)
 
             # Use scheduler if present.
             if self._scheduler:
@@ -448,16 +472,19 @@ class Trainer2:
         try:
             TRAIN_LOG_PATH = os.path.join(self._path, "train_log.csv")
             CHECKPOINT_PATH = os.path.join(self._path, "checkpoints")
-            CHECKPOINT_NAME = os.path.split(os.listdir(CHECKPOINT_PATH)[-1])[-1]
+            CHECKPOINT_NAME = os.path.split(os.listdir(CHECKPOINT_PATH)[-1])[
+                -1]
         except FileNotFoundError:
-            raise FileNotFoundError("No checkpoints detected for current path of trainer.")
+            raise FileNotFoundError(
+                "No checkpoints detected for current path of trainer.")
 
         self._path = path
         self._train_log = pd.read_csv(TRAIN_LOG_PATH)
-        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(self._model,
-                                                                                        self._optimizer,
-                                                                                        path=CHECKPOINT_PATH,
-                                                                                        name=CHECKPOINT_NAME)
+        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(
+            self._model,
+            self._optimizer,
+            path=CHECKPOINT_PATH,
+            name=CHECKPOINT_NAME)
 
     def load_checkpoint_epoch(self, path, epoch):
         try:
@@ -465,22 +492,26 @@ class Trainer2:
             CHECKPOINT_PATH = os.path.join(self._path, "checkpoints")
             CHECKPOINT_NAME = "checkpoint_" + str(epoch) + ".pt"
         except FileNotFoundError:
-            raise FileNotFoundError("No checkpoints detected for current path of trainer.")
+            raise FileNotFoundError(
+                "No checkpoints detected for current path of trainer.")
 
         self._path = path
         self._train_log = pd.read_csv(TRAIN_LOG_PATH)
-        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(self._model,
-                                                                                        self._optimizer,
-                                                                                        path=CHECKPOINT_PATH,
-                                                                                        name=CHECKPOINT_NAME)
+        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(
+            self._model,
+            self._optimizer,
+            path=CHECKPOINT_PATH,
+            name=CHECKPOINT_NAME)
 
     def save_general_epoch_checkpoint(self):
         TRAIN_LOG_PATH = os.path.join(self._path, "train_log.csv")
-        CHECKPOINT_PATH = self.ensure_path_exists(os.path.join(self._path, "checkpoints"))
+        CHECKPOINT_PATH = self.ensure_path_exists(
+            os.path.join(self._path, "checkpoints"))
         CHECKPOINT_NAME = 'checkpoint_' + str(self._epoch)
 
         self._train_log.to_csv(TRAIN_LOG_PATH, index=False)
-        save_general_checkpoint(self._model, self._optimizer, self._epoch, self._loss,
+        save_general_checkpoint(self._model, self._optimizer, self._epoch,
+                                self._loss,
                                 path=CHECKPOINT_PATH,
                                 name=CHECKPOINT_NAME)
 
@@ -490,9 +521,12 @@ class Trainer2:
         try:
             assert type.issubset(_allowed_type)
         except AssertionError:
-            raise AssertionError("Argument for save_final_model(type=X) must be in: ", _allowed_type)
+            raise AssertionError(
+                "Argument for save_final_model(type=X) must be in: ",
+                _allowed_type)
 
-        self._train_log.to_csv(os.path.join(self._path, "train_log.csv"), index=False)
+        self._train_log.to_csv(os.path.join(self._path, "train_log.csv"),
+                               index=False)
 
         if 'model_state_dict' in type:
             save_model_state_dict(self._model, self._path)
@@ -543,6 +577,7 @@ class Trainer3:
                  criterion=None,
                  batch_size=200,
                  num_epochs=150,
+                 early_stopping=None,
                  learning_rate=1e-2):
 
         # Ensure unique path exists to avoid saving over existing.
@@ -554,20 +589,24 @@ class Trainer3:
         # Various datasets for model training.
         self._training_dataset = training_dataset
         self._validation_dataset = validation_dataset
+        self._early_stopping = early_stopping
 
         # Load components of the training.
         self._model = model
-        self._optimizer = optimizer(model.parameters(), lr=learning_rate) if optimizer is not None else None
+        self._optimizer = optimizer(model.parameters(),
+                                    lr=learning_rate) if optimizer is not None else None
         self._criterion = criterion()
         self._loss = None
         self._scheduler = None
 
         # Device configuration
-        self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self._device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu')
         self._batch_size = batch_size
         self._num_epochs = num_epochs
         self._learning_rate = learning_rate
-        self._train_log = pd.DataFrame(columns=["epoch", "train_loss", "test_loss", "learning_rate"])
+        self._train_log = pd.DataFrame(
+            columns=["epoch", "train_loss", "test_loss", "learning_rate"])
         self._epoch = 0
         self._model.to(self._device)
 
@@ -612,12 +651,16 @@ class Trainer3:
 
         rt_ax[0].plot(epoch_series, train_loss_series, label="Train loss")
         # rt_ax[0].plot(epoch_series, test_loss_series, label="Test loss")
-        rt_ax[0].plot(epoch_series, validation_loss_series, label="Validation loss")
+        rt_ax[0].plot(epoch_series, validation_loss_series,
+                      label="Validation loss")
         rt_ax[0].legend()
 
-        rt_ax[1].plot(epoch_series[-500:], train_loss_series[-500:].rolling(100).mean(), label="Train loss")
+        rt_ax[1].plot(epoch_series[-500:],
+                      train_loss_series[-500:].rolling(100).mean(),
+                      label="Train loss")
         # rt_ax[1].plot(epoch_series[-500:], test_loss_series[-500:].rolling(100).mean(), label="Test loss (M10)")
-        rt_ax[1].plot(epoch_series[-500:], validation_loss_series[-500:].rolling(100).mean(),
+        rt_ax[1].plot(epoch_series[-500:],
+                      validation_loss_series[-500:].rolling(100).mean(),
                       label="Validation loss (M10)")
         rt_ax[1].legend()
 
@@ -630,6 +673,12 @@ class Trainer3:
                save_each_epoch=True,
                save_final_model=True,
                plot_jupyter=None):
+
+        if early_stopping is not None:
+            self._early_stopping = early_stopping
+        else:
+            early_stopping = self._early_stopping
+        early_stopping.reset()
 
         if plot_jupyter:
             rt_fig, rt_ax = plt.subplots(2, 1, figsize=(4, 3), dpi=300)
@@ -714,7 +763,8 @@ class Trainer3:
                     epoch_validation_loss += loss.item()
 
             # POST VALIDATION
-            validation_loss_item = epoch_validation_loss / len(validation_loader)
+            validation_loss_item = epoch_validation_loss / len(
+                validation_loader)
 
             # ██████╗  ██████╗ ███████╗████████╗    ███████╗██████╗  ██████╗  ██████╗██╗  ██╗
             # ██╔══██╗██╔═══██╗██╔════╝╚══██╔══╝    ██╔════╝██╔══██╗██╔═══██╗██╔════╝██║  ██║
@@ -724,11 +774,16 @@ class Trainer3:
             # ╚═╝      ╚═════╝ ╚══════╝   ╚═╝       ╚══════╝╚═╝      ╚═════╝  ╚═════╝╚═╝  ╚═╝
             # LOGGING.
             learning_rate = get_lr(self._optimizer)
-            self._train_log = pd.concat([self._train_log, pd.DataFrame({"epoch": [self._epoch + 1],
-                                                                        "train_loss": [train_loss_item],
-                                                                        # "test_loss": [test_loss_item],
-                                                                        "validation_loss": [validation_loss_item],
-                                                                        "learning_rate": [learning_rate]})], sort=False)
+            self._train_log = pd.concat(
+                [self._train_log, pd.DataFrame({"epoch": [self._epoch + 1],
+                                                "train_loss": [
+                                                    train_loss_item],
+                                                # "test_loss": [test_loss_item],
+                                                "validation_loss": [
+                                                    validation_loss_item],
+                                                "learning_rate": [
+                                                    learning_rate]})],
+                sort=False)
 
             # Use scheduler if present.
             if self._scheduler:
@@ -793,16 +848,19 @@ class Trainer3:
         try:
             TRAIN_LOG_PATH = os.path.join(self._path, "train_log.csv")
             CHECKPOINT_PATH = os.path.join(self._path, "checkpoints")
-            CHECKPOINT_NAME = os.path.split(os.listdir(CHECKPOINT_PATH)[-1])[-1]
+            CHECKPOINT_NAME = os.path.split(os.listdir(CHECKPOINT_PATH)[-1])[
+                -1]
         except FileNotFoundError:
-            raise FileNotFoundError("No checkpoints detected for current path of trainer.")
+            raise FileNotFoundError(
+                "No checkpoints detected for current path of trainer.")
 
         self._path = path
         self._train_log = pd.read_csv(TRAIN_LOG_PATH)
-        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(self._model,
-                                                                                        self._optimizer,
-                                                                                        path=CHECKPOINT_PATH,
-                                                                                        name=CHECKPOINT_NAME)
+        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(
+            self._model,
+            self._optimizer,
+            path=CHECKPOINT_PATH,
+            name=CHECKPOINT_NAME)
 
     def load_checkpoint_epoch(self, path, epoch):
         try:
@@ -810,22 +868,26 @@ class Trainer3:
             CHECKPOINT_PATH = os.path.join(self._path, "checkpoints")
             CHECKPOINT_NAME = "checkpoint_" + str(epoch) + ".pt"
         except FileNotFoundError:
-            raise FileNotFoundError("No checkpoints detected for current path of trainer.")
+            raise FileNotFoundError(
+                "No checkpoints detected for current path of trainer.")
 
         self._path = path
         self._train_log = pd.read_csv(TRAIN_LOG_PATH)
-        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(self._model,
-                                                                                        self._optimizer,
-                                                                                        path=CHECKPOINT_PATH,
-                                                                                        name=CHECKPOINT_NAME)
+        self._model, self._optimizer, self._epoch, self._loss = load_general_checkpoint(
+            self._model,
+            self._optimizer,
+            path=CHECKPOINT_PATH,
+            name=CHECKPOINT_NAME)
 
     def save_general_epoch_checkpoint(self):
         TRAIN_LOG_PATH = os.path.join(self._path, "train_log.csv")
-        CHECKPOINT_PATH = self.ensure_path_exists(os.path.join(self._path, "checkpoints"))
+        CHECKPOINT_PATH = self.ensure_path_exists(
+            os.path.join(self._path, "checkpoints"))
         CHECKPOINT_NAME = 'checkpoint_' + str(self._epoch)
 
         self._train_log.to_csv(TRAIN_LOG_PATH, index=False)
-        save_general_checkpoint(self._model, self._optimizer, self._epoch, self._loss,
+        save_general_checkpoint(self._model, self._optimizer, self._epoch,
+                                self._loss,
                                 path=CHECKPOINT_PATH,
                                 name=CHECKPOINT_NAME)
 
@@ -835,9 +897,12 @@ class Trainer3:
         try:
             assert type.issubset(_allowed_type)
         except AssertionError:
-            raise AssertionError("Argument for save_final_model(type=X) must be in: ", _allowed_type)
+            raise AssertionError(
+                "Argument for save_final_model(type=X) must be in: ",
+                _allowed_type)
 
-        self._train_log.to_csv(os.path.join(self._path, "train_log.csv"), index=False)
+        self._train_log.to_csv(os.path.join(self._path, "train_log.csv"),
+                               index=False)
 
         if 'model_state_dict' in type:
             save_model_state_dict(self._model, self._path)

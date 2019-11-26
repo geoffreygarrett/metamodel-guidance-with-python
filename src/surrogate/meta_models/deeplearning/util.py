@@ -176,6 +176,11 @@ class LutzPrecheltEarlyStopping:
         self.error_validation_history = []
         self.error_training_history = []
 
+    def reset(self):
+        self.error_validation_history = []
+        self.error_training_history = []
+        self.early_stop = False
+
     def eval_criteria(self):
         """
         :return:
