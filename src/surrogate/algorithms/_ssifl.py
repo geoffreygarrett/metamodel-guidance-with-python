@@ -511,6 +511,7 @@ class SSIFL(BaseIncrementalFunctionLearning):
             self.meta_model.optimise_fit(*self._training_data,
                                          validation_data=self._validation_data,
                                          # score_function=self.model_score,
+                                         tdmq=tdmq,
                                          reset=False,
                                          verbose=verbose)
 
