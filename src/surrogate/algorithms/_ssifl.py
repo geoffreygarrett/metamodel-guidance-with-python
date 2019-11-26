@@ -335,7 +335,8 @@ class SSIFL(BaseIncrementalFunctionLearning):
 
     def __init__(self, func, x_dim, meta_model, delta, epsilon,
                  sample_num=s_num_diego, sample_idx=s_idx_diego, scaler=None,
-                 test_frac=0.2, seed=42, logging=0, verbose=False, tdmq=False):
+                 test_frac=0.2, seed=42, logging=0,
+                 **kwargs):
         """
         Parameters
         ----------
@@ -393,9 +394,18 @@ class SSIFL(BaseIncrementalFunctionLearning):
                          scaler, test_frac, seed=seed,
                          logging=logging)
 
-        self._algorithm_settings = dict(cumulative=True, importance="error",
-                                        tdmq=False,
-                                        verbose=False, hopt=True)
+        self._algorithm_settings = dict(
+            cumulative=kwargs.pop("cumulative", True),
+            importance=kwargs.pop("importance", "error"),
+            tdmq=kwargs.pop("tdmq", False),
+            verbose=kwargs.pop("verbose", False),
+            hopt=kwargs.pop("hopt", True),
+            clip=kwargs.pop("clip", False),
+            v=kwargs.pop("v", 1))
+
+        tdmq = self._algorithm_settings["tdmq"]
+        verbose = self._algorithm_settings["verbose"]
+
         self.delta = delta
         self.epsilon = epsilon
         # self.meta_model.static_params['epsilon'] = 0.975 * epsilon
@@ -462,8 +472,7 @@ class SSIFL(BaseIncrementalFunctionLearning):
     # def iterate(self, cumulative=True, importance="error", tdmq=False,
     #             verbose=False, hopt=True):
 
-    def iterate(self, cumulative=True, importance="error", tdmq=False,
-                verbose=False, hopt=True, clip=1e-8, v=3):
+    def iterate(self, **kwargs):
         """
         Carries out next iteration of algorithm.
 
@@ -650,15 +659,14 @@ class SSIFL(BaseIncrementalFunctionLearning):
         else:
             raise RuntimeError("Logging argument not recognised.")
 
-    def iterate_to_confidence(self, cumulative=False, importance="error",
-                              tdmq=False, verbose=False, hopt=False, clip=1e-8,
-                              v=3):
-
-        self._algorithm_settings = dict(cumulative=cumulative,
-                                        importance=importance,
-                                        tdmq=tdmq,
-                                        verbose=verbose, hopt=hopt, clip=clip,
-                                        v=v)
+    def iterate_to_confidence(self):
+        cumulative = self.algorithm_settings["cumulative"]
+        importance = self.algorithm_settings["importance"]
+        tdmq = self.algorithm_settings["tdmq"]
+        verbose = self.algorithm_settings["verbose"]
+        hopt = self.algorithm_settings["hopt"]
+        clip = self.algorithm_settings["clip"]
+        v = self.algorithm_settings["v"]
 
         while not self.terminate:
             self.iterate(cumulative=cumulative, importance=importance,
