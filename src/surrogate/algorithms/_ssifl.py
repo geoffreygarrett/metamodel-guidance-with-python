@@ -507,9 +507,9 @@ class SSIFL(BaseIncrementalFunctionLearning):
 
         if hopt:
             # Fit and optimise the tunable parameters of the model.
-            self.meta_model.fit_optimise(*self._training_data,
+            self.meta_model.optimise_fit(*self._training_data,
                                          *self._validation_data,
-                                         score_function=self.model_score,
+                                         # score_function=self.model_score,
                                          reset=False,
                                          verbose=verbose,
                                          tdmq=tdmq)
