@@ -3,7 +3,8 @@ from src.surrogate.meta_models.deeplearning import Trainer3
 import torch.nn as nn
 import torch
 from src.surrogate.meta_models.modules import activation_dict
-from src.surrogate.meta_models.modules.fx import RegressionOutput, BasicBlock
+from src.surrogate.meta_models.modules.fx import RegressionOutput, BasicBlock, \
+    ResidualBlock
 from src.dataset import DataSetFX
 from src.surrogate.meta_models.deeplearning.util import \
     LutzPrecheltEarlyStopping
@@ -18,7 +19,7 @@ DEFAULT_FFNNR_PARAMS = {
     "n_hidden_neurons": 500,
 
     # Training.
-    "dropout_rate":0.0,
+    "dropout_rate": 0.0,
     "learning_rate": 1e-4,
     "batch_size": 64,
 
@@ -81,8 +82,35 @@ class SimpleRectangularNN(nn.Module):
               activation_dict[activation],
               nn.Dropout(dropout_rate),
               nn.BatchNorm1d(n_hidden_neurons)
-              ] * int(n_hidden_layers - 2)
+              ] * int(n_hidden_layers - 1)
         )
+        self.fc_out = RegressionOutput(n_hidden_neurons, fdim)
+
+    def forward(self, x):
+        x = self.fc_in(x)
+        x = self.fc_center(x)
+        return self.fc_out(x)
+
+
+class SimpleResidualNN(nn.Module):
+
+    def __init__(self, model_params):
+        Xdim = model_params["x_dim"]
+        fdim = model_params["f_dim"]
+        activation = model_params["activation"]
+        dropout_rate = model_params["dropout_rate"]
+        n_hidden_layers = model_params["n_hidden_layers"]
+        n_hidden_neurons = model_params["n_hidden_neurons"]
+        super().__init__()
+        self.fc_in = nn.Sequential(
+            *[nn.Linear(Xdim, n_hidden_neurons),
+              activation_dict[activation],
+              nn.Dropout(dropout_rate),
+              nn.BatchNorm1d(n_hidden_neurons)]
+        )
+        self.fc_center = nn.Sequential(
+            [ResidualBlock(n_hidden_neurons, activation)] * int(
+                n_hidden_layers - 1))
         self.fc_out = RegressionOutput(n_hidden_neurons, fdim)
 
     def forward(self, x):
