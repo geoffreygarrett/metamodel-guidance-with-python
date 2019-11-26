@@ -197,7 +197,7 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
                                                      shuffle=shuffle)
 
                 fit_options["validation_data"] = (x_test, y_test)
-                post_model, _ = self._fit(
+                post_model, trainer = self._fit(
                     x_train, y_train, pre_model,
                     **decision_params,
                     **fit_options)

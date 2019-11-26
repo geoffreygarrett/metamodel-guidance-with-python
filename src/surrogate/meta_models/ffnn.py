@@ -176,7 +176,7 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
     def copy_model(self, model):
         state_dict = model.state_dict()
         copied_model = self._model_cls(
-            **self.architecture_hyperparameters(self.hyperparameters))
+            self.architecture_hyperparameters(self.hyperparameters))
         copied_model.load_state_dict(state_dict)
         return copied_model
 
