@@ -579,7 +579,7 @@ class Trainer3:
                  num_epochs=150,
                  early_stopping=None,
                  learning_rate=1e-2):
-
+        batch_size = int(batch_size)
         # Ensure unique path exists to avoid saving over existing.
         try:
             self._path = self.ensure_unique_path_exists(PATH)
