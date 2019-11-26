@@ -530,7 +530,7 @@ class SSIFL(BaseIncrementalFunctionLearning):
         self._terminate = evaluation_log.terminate
 
         if self._iteration >= self._maxiter:
-            if self._maxiter != -1:
+            if self._maxiter == -1:
                 pass
             else:
                 self._terminate = True
