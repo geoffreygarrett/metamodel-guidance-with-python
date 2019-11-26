@@ -678,7 +678,9 @@ class Trainer3:
             self._early_stopping = early_stopping
         else:
             early_stopping = self._early_stopping
-        early_stopping.reset()
+
+        if early_stopping is not None and early_stopping is not False:
+            early_stopping.reset()
 
         if plot_jupyter:
             rt_fig, rt_ax = plt.subplots(2, 1, figsize=(4, 3), dpi=300)
