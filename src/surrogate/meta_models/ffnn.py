@@ -16,10 +16,10 @@ DEFAULT_FFNNR_PARAMS = {
     # Architecture.
     "activation": "leaky_relu",
     "n_hidden_layers": 3,
-    "n_hidden_neurons": 1000,
+    "n_hidden_neurons": 800,
 
     # Training.
-    "dropout_rate": 0.0,
+    "dropout_rate": 1e-5,
     "learning_rate": 1e-4,
     "batch_size": 64,
 
@@ -43,9 +43,9 @@ DEFAULT_FFNNR_ROUTINES = dict(
             # "categorical__activation": ["leaky_relu", "sigmoid"],
             # "_function__learning_rate": 1e-4,
             "_function__early_stopping":
-                LutzPrecheltEarlyStopping(10, criteria=(("PQ", 1.0),)),
+                LutzPrecheltEarlyStopping(10, criteria=(("PQ", 1.00),)),
             "_optimiser__name": "gp_minimize",
-            "_optimiser__kwargs": {"n_calls": 15}
+            "_optimiser__kwargs": {"n_calls": 25}
         },
     ],
     intermediate=[
