@@ -691,6 +691,8 @@ class Trainer3:
         # ██║  ██║██╔══██║   ██║   ██╔══██║    ██║     ██║   ██║██╔══██║██║  ██║██╔══╝  ██╔══██╗╚════██║
         # ██████╔╝██║  ██║   ██║   ██║  ██║    ███████╗╚██████╔╝██║  ██║██████╔╝███████╗██║  ██║███████║
         # ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝
+        while len(self._training_dataset) % self._batch_size == 1:
+            self._batch_size += 1
         train_loader = self._train_loader(self._training_dataset)
         # test_loader = self._test_loader(self._testing_dataset)
         validation_loader = self._validation_loader(self._validation_dataset)

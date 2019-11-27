@@ -469,10 +469,6 @@ class SSIFL(BaseIncrementalFunctionLearning):
     def algorithm_settings(self, x):
         self._algorithm_settings = x
 
-    #
-    # def iterate(self, cumulative=True, importance="error", tdmq=False,
-    #             verbose=False, hopt=True):
-
     def iterate(self, **kwargs):
         """
         Carries out next iteration of algorithm.
