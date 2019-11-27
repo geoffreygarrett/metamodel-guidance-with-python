@@ -24,7 +24,7 @@ DEFAULT_FFNNR_PARAMS = {
     "batch_size": 64,
 
     # "batch_size_fraction": 0.05,
-    "num_epochs": 500,
+    "num_epochs": 1000,
     "early_stopping": LutzPrecheltEarlyStopping(10, criteria=(("PQ", 1.5),)),
     'optimizer': torch.optim.Adam,
     'criterion': torch.nn.modules.loss.MSELoss,
@@ -43,7 +43,7 @@ DEFAULT_FFNNR_ROUTINES = dict(
             # "categorical__activation": ["leaky_relu", "sigmoid"],
             # "_function__learning_rate": 1e-4,
             "_function__early_stopping":
-                LutzPrecheltEarlyStopping(10, criteria=(("PQ", 0.6),)),
+                LutzPrecheltEarlyStopping(10, criteria=(("PQ", 1.0),)),
             "_optimiser__name": "gp_minimize",
             "_optimiser__kwargs": {"n_calls": 15}
         },
@@ -54,7 +54,7 @@ DEFAULT_FFNNR_ROUTINES = dict(
             "real__learning_rate": (1e-6, 5e-4),
             "integer__batch_size": (60, 300),
             "_function__early_stopping":
-                LutzPrecheltEarlyStopping(5, criteria=(("PQ", 2.0),))
+                LutzPrecheltEarlyStopping(5, criteria=(("PQ", 1.0),))
         },
 
     ]
