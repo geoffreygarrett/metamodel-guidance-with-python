@@ -35,7 +35,7 @@ DEFAULT_FFNNR_ROUTINES = dict(
     initial=[
         {
             # Architecture optimisation.
-            "integer__n_hidden_layers": (1, 3),
+            "integer__n_hidden_layers": (2, 4),
             # "integer__n_hidden_neurons": (600, 1000),
             # "real__dropout_rate": (1e-4, 1e-2),
             # "integer__batch_size": (70, 300),
