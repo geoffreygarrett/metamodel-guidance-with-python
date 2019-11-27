@@ -16,7 +16,7 @@ DEFAULT_FFNNR_PARAMS = {
     # Architecture.
     "activation": "leaky_relu",
     "n_hidden_layers": 3,
-    "n_hidden_neurons": 500,
+    "n_hidden_neurons": 1000,
 
     # Training.
     "dropout_rate": 0.0,
