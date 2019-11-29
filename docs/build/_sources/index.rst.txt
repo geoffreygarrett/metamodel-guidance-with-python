@@ -12,9 +12,8 @@ learning. It has been developed during my internship at Airbus Defence and Space
 Kristen Lagadec.
 
 .. toctree::
-   :maxdepth: 20
+   :maxdepth: 2
    :caption: Sub-modules
-   :titlesonly:
 
    _src_docs/sampling
    _src_docs/dataset

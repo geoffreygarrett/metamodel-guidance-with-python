@@ -15,6 +15,7 @@ Random uniform
    :members: random_uniform
    :private-members:
    :special-members:
+   :noindex:
 
 Halton sequences
 ****************
@@ -22,16 +23,18 @@ Halton sequences
    :members: halton
    :private-members:
    :special-members:
+   :noindex:
 
 Geometric methods
 #################
 
-Uniform grid (UG)
-*****************
+Uniform grid
+************
 .. automodule:: sampling
    :members: uniform_grid
    :private-members:
    :special-members:
+   :noindex:
 
 Full factorial
 **************
@@ -39,11 +42,12 @@ Full factorial
    :members: full_factorial
    :private-members:
    :special-members:
+   :noindex:
 
-Centroidal Voronoi Tessellation (CVT)
-*************************************
+Centroidal Voronoi Tessellation
+*******************************
 .. automodule:: sampling
    :members: cvt
    :private-members:
    :special-members:
-
+   :noindex:
