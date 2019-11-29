@@ -28,6 +28,8 @@
   
 
   
+    <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  
 
   
         <link rel="index" title="Index"
@@ -90,7 +92,18 @@
 <li class="toctree-l1"><a class="reference internal" href="dataset.html"><strong>mmgpy.dataset</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="matlab.html"><strong>mmgpy.matlab</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="metamodel.html"><strong>mmgpy.metamodel</strong></a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>mmgpy.optimise</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>mmgpy.optimise</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#constructors">Constructors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#base-constructor">Base constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#base-dynamics-constructor">Base dynamics constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#routines">Routines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-optimise.routine">Base optimisation routine</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="problems.html"><strong>mmgpy.problems</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plots.html"><strong>mmgpy.plots</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="test.html"><strong>mmgpy.test</strong></a></li>
@@ -157,8 +170,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-optimise.routine">
-<span id="mmgpy-optimise"></span><h1><strong>mmgpy.optimise</strong><a class="headerlink" href="#module-optimise.routine" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="mmgpy-optimise">
+<h1><strong>mmgpy.optimise</strong><a class="headerlink" href="#mmgpy-optimise" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructors">
+<h2>Constructors<a class="headerlink" href="#constructors" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="base-constructor">
+<h3>Base constructor<a class="headerlink" href="#base-constructor" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="base-dynamics-constructor">
+<h3>Base dynamics constructor<a class="headerlink" href="#base-dynamics-constructor" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="routines">
+<h2>Routines<a class="headerlink" href="#routines" title="Permalink to this headline">¶</a></h2>
+<p>The general optimisation routine management framework is described by three routines: <strong>initial</strong>, <strong>intermediate</strong> and
+<strong>closing</strong>. There are two conditions that are checked during further optimisation calls, which are dependent on the
+current state of the optimisation manager: <strong>reset</strong> and <strong>close</strong>. Each subroutine optimisation call is performed on a
+subset of the <strong>global static parameters</strong>. The following flowchart is exemplar of the framework.</p>
+<div class="graphviz"><img src="../_images/graphviz-c75a56fa52cb62a212782f9d20435f1819fcbf4a.png" alt="digraph foo {
+
+     # General diagram settings.
+     graph [splines=ortho, nodesep=0.5, pad=&quot;0.2,0.2&quot;];
+
+     # General node settings.
+     node [shape = box, style = filled, width = 1.5, fixedsize = true, color = lightgrey, fontname = Times, fontsize = 10];
+
+     # Specific node color settings.
+     Global [color = lightgrey, label=&quot;Global static parameters&quot;];
+     Initial [color = aquamarine, label=&quot;Initial routine&quot;];
+     Intermediate [color = lightblue, label=&quot;Intermediate routine&quot;];
+     Closing [color = tomato, label=&quot;Closing routine&quot;];
+
+     # Decision node settings.
+     reset [color = khaki1, shape = diamond, label=&quot;reset?&quot;];
+     close [color = khaki1, shape = diamond, label=&quot;close?&quot;];
+
+     subgraph cluster_process
+     {
+         # cluster settings
+         fontsize = 9;
+         style=invisible;
+
+         Initial -&gt; reset;
+         reset -&gt; Intermediate [ label=&quot;no&quot; ];
+         reset -&gt; Initial [ label=&quot;yes&quot; ];
+         Intermediate -&gt; close;
+         close -&gt; reset [ label=&quot;no&quot; , spline=ortho ];
+         close -&gt; Closing [ label=&quot;yes&quot; ];
+     }
+
+
+ }" class="graphviz" /></div>
+<div class="section" id="module-optimise.routine">
+<span id="base-optimisation-routine"></span><h3>Base optimisation routine<a class="headerlink" href="#module-optimise.routine" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="optimise.routine.BaseOptimiserRoutine">
 <em class="property">class </em><code class="sig-prename descclassname">optimise.routine.</code><code class="sig-name descname">BaseOptimiserRoutine</code><span class="sig-paren">(</span><em class="sig-param">routines=None</em>, <em class="sig-param">default_kwargs=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.BaseOptimiserRoutine" title="Permalink to this definition">¶</a></dt>
@@ -573,6 +637,8 @@ determine the optimisation logic.</p>
 </dd></dl>
 
 <span class="target" id="module-optimise.constructor"></span></div>
+</div>
+</div>
 
 
            </div>

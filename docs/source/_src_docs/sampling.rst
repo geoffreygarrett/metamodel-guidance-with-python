@@ -1,7 +1,8 @@
 
 **mmgpy.sampling**
 ==================
-Sampling methods
+
+The sampling module contains various methods for sampling
 
 .. toctree::
    :maxdepth: 2

@@ -36,7 +36,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
+    'sphinx.ext.graphviz'
 ]
 source_suffix = '.rst'
 master_doc = 'index'
