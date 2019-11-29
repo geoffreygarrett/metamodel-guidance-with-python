@@ -27,7 +27,6 @@ __pycache__/
 # Common build output folders
 cmake-build-debug/
 cmake-build-release/
-build/
 .build/
 
 # IDE project files

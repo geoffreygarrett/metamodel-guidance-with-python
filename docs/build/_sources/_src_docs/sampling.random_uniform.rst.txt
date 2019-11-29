@@ -1,0 +1,6 @@
+sampling.random\_uniform
+========================
+
+.. currentmodule:: sampling
+
+.. autofunction:: random_uniform

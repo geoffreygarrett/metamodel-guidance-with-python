@@ -1,0 +1,659 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mmgpy.optimise &mdash; mmgpy 0.8.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="mmgpy 0.8.0 documentation" href="../index.html"/>
+        <link rel="next" title="mmgpy.problems" href="problems.html"/>
+        <link rel="prev" title="mmgpy.metamodel" href="metamodel.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> mmgpy
+          
+
+          
+            
+            <img src="../_static/logos.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Sub-modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sampling.html"><strong>mmgpy.sampling</strong> module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html"><strong>mmgpy.dataset</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="matlab.html"><strong>mmgpy.matlab</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="metamodel.html"><strong>mmgpy.metamodel</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>mmgpy.optimise</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="problems.html"><strong>mmgpy.problems</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plots.html"><strong>mmgpy.plots</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html"><strong>mmgpy.test</strong></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_src_notebooks/HOPT - Sampling Importance.html">Testing titles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_src_notebooks/SSIFL training.html">SSIFL</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mmgpy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><strong>mmgpy.optimise</strong></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_src_docs/optimise.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-optimise.routine">
+<span id="mmgpy-optimise"></span><h1><strong>mmgpy.optimise</strong><a class="headerlink" href="#module-optimise.routine" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="optimise.routine.BaseOptimiserRoutine">
+<em class="property">class </em><code class="sig-prename descclassname">optimise.routine.</code><code class="sig-name descname">BaseOptimiserRoutine</code><span class="sig-paren">(</span><em class="sig-param">routines=None</em>, <em class="sig-param">default_kwargs=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.BaseOptimiserRoutine" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Notes</p>
+<p>Definition of parameters.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>default</cite></dt><dd><p>Default parameter of the target function.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>static</cite></dt><dd><p>A parameter which has either:</p>
+<ul>
+<li><p>been explicitly defined by the user or</p></li>
+<li><p>has been optimised in a previous subroutine.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>decision</cite></dt><dd><p>The parameter which is to be optimised for in the current
+optimisation subroutine.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Three routine types are defined in the framework :</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>initial</cite></dt><dd><p>The initial routine is the first optimisation routine
+following the initialisation of the class which,</p>
+<ul>
+<li><p>is only done once following .__init__() unless the
+<cite>reset</cite> method is called,</p></li>
+<li><p>taken as the <cite>intermediate</cite> routine if it is not
+explicitly defined.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>intermediate</cite></dt><dd><p>The intermediate routine is called following the
+<cite>initial</cite> routine and prior to the <cite>closing</cite> routine.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>closing</cite></dt><dd><p>The closing routine is the final optimisation routine
+following the <cite>intermediate</cite> routine,</p>
+<ul>
+<li><p>which is called only once the <cite>close</cite> method has been
+called.</p></li>
+<li><p>whose result will be the last saved <cite>intermediate</cite>
+routine if a <cite>closing</cite> routine is not defined.</p></li>
+<li><p>which will be called in any consecutive optimisation
+calls without calling the <cite>reset</cite> (raises Warning).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="simple">
+<dt>Strictly speaking, given the above definition of routines only an</dt><dd><p><cite>intermediate</cite> routine is required.</p>
+</dd>
+</dl>
+<p>A routine is in the form of a list, which hold optimisation
+subroutines, whose results are passed onto the next subroutine in
+the order of definition. Parameters are cumulatively redefined
+throughout subroutines. The following two cases are presented:</p>
+<ul>
+<li><p>If <cite>param_1</cite> is defined in <cite>sub_routine_1</cite>, but not in
+<cite>sub_routine_2</cite>,</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>param_1</cite> will become a <cite>static_param</cite> of
+<cite>sub_routine_2</cite>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>If <cite>param_1</cite> has been optimised in <cite>sub_routine_final</cite> of the
+<cite>intermediate</cite> optimisation routine and is not a <cite>decision</cite>
+parameter of <cite>sub_routine_1</cite>,</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a subsequent call of <cite>sub_routine_1</cite> will take the
+optimised result of <cite>param_1</cite> as a <cite>static_param</cite> of
+<cite>sub_routine_1</cite>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Subroutines are lists of dictionaries which hold a
+key-value pair in either of the forms;
+(<cite>param_type__param_name</cite> : <cite>param_domain</cite>) or
+(<cite>optimiser__optimiser_name</cite> : <cite>optimiser_kwargs</cite>).</p>
+<ul>
+<li><dl class="simple">
+<dt><cite>param_type</cite> [str in {“categorical”, “real”, “integer”}]:</dt><dd><p>Parameter type to optimise.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><cite>param_domain</cite> [list, tuple of float, tuple of int]:</dt><dd><p>Domain of parameter to optimise where:</p>
+<ul>
+<li><p>categorical params are given as a <cite>list</cite>,</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">domain_categorical</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;option1&quot;</span><span class="p">,</span> <span class="s2">&quot;option2&quot;</span><span class="p">,</span> <span class="s2">&quot;option3&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p>real params are given as a <cite>tuple</cite> of inclusive bounds,</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">domain_real</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>and integer params are given as a <cite>tuple</cite> of inclusive
+bounds.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">domain_integer</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>optimiser__optimiser_name</cite></dt><dd><p>Only one is allowed per sub-routine. If the user
+provides more than one, an AssertionError is raised. The
+accepted <cite>optimiser_name</cite> arguments correspond to the supported
+optimiser functions from the <cite>skopt</cite> module (See [1]).</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>gp_minimize</cite></dt><dd><p>Bayesian optimization using Gaussian Processes (Default).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘forest_minimize`</dt><dd><p>Sequential optimisation using decision trees.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>gbrt_minimize</cite></dt><dd><p>Sequential optimization using gradient boosted trees.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p class="rubric">Examples</p>
+<p>The specific function used for optimisation in the skopt module
+can be defined optionally as follows:</p>
+<ul>
+<li><dl>
+<dt>Example 1:</dt><dd><p>Three parameters, categorical, real and integer with
+default optimiser (<cite>gp_minimize</cite>) and default optimiser
+parameters.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sub_routine_1</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;categorical__param_1&quot;</span><span class="p">:</span> <span class="n">domain_categorical</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;real__param_2&quot;</span><span class="p">:</span> <span class="n">domain_real</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;integer__param_3&quot;</span><span class="p">:</span> <span class="n">domain_integer</span>
+<span class="gp">... </span><span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Example 2:</dt><dd><p>Three parameters, categorical, real and integer, with
+non-default optimiser settings.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sub_routine_2</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;categorical__param_1&quot;</span><span class="p">:</span> <span class="n">domain_categorical</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;real__param_2&quot;</span><span class="p">:</span> <span class="n">domain_real</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;integer__param_3&quot;</span><span class="p">:</span> <span class="n">domain_integer</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;optimiser__gp_minimize&quot;</span><span class="p">:</span> <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;n_calls&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;n_random_starts&quot;</span><span class="p">:</span> <span class="mi">6</span>
+<span class="gp">... </span>        <span class="p">}</span>
+<span class="gp">... </span><span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Example 3:</dt><dd><p>Three parameters, categorical, real and integer, with
+non-default optimiser and non-default settings, defined
+in dict form.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sub_routine_3</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">categorical__param_1</span><span class="o">=</span><span class="n">domain_categorical</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">real__param_2</span><span class="o">=</span><span class="n">domain_real</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">integer__param_3</span><span class="o">=</span><span class="n">domain_integer</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">optimiser__forest_minimize</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">n_calls</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+<span class="gp">... </span>                                    <span class="n">n_random_starts</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Example 4:</dt><dd><p>A definition of a routine.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">example_routine</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">sub_routine_1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sub_routine_2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sub_routine_3</span>
+<span class="gp">... </span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+<p class="rubric">References</p>
+<dl class="footnote brackets">
+<dt class="label" id="id1"><span class="brackets">1</span></dt>
+<dd><p>Scikit-optimise module <a class="reference external" href="https://scikit-optimise.github.io/">https://scikit-optimise.github.io/</a></p>
+</dd>
+</dl>
+<p># TODO: Add optional load to kwargs for loading.</p>
+<p class="rubric">Notes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>routines [dict, list of dict or list of list of dict]</strong> – The routine parameter can be interpreted three ways for
+hyperparameter optimisation. It should be noted that the
+instantiated class will behave consistently according to
+the logic behind the supplied routine, defined below. There
+are three routine types defined as:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>dict</cite></dt><dd><p>A dictionary can be provided with three keys which
+determine the optimisation logic.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>list</cite></dt><dd><p>A single list</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="optimise.routine.BaseOptimiserRoutine.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">routines=None</em>, <em class="sig-param">default_kwargs=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.BaseOptimiserRoutine.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p># TODO: Add optional load to kwargs for loading.</p>
+<p class="rubric">Notes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>routines [dict, list of dict or list of list of dict]</strong> – The routine parameter can be interpreted three ways for
+hyperparameter optimisation. It should be noted that the
+instantiated class will behave consistently according to
+the logic behind the supplied routine, defined below. There
+are three routine types defined as:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>dict</cite></dt><dd><p>A dictionary can be provided with three keys which
+determine the optimisation logic.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>list</cite></dt><dd><p>A single list</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="optimise.routine.BaseOptimiserRoutine.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#optimise.routine.BaseOptimiserRoutine.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="optimise.routine.BaseOptimiserRoutine.optimise">
+<code class="sig-name descname">optimise</code><span class="sig-paren">(</span><em class="sig-param">function</em>, <em class="sig-param">tdmq=False</em>, <em class="sig-param">callback=None</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.BaseOptimiserRoutine.optimise" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong></p></li>
+<li><p><strong>tdmq</strong></p></li>
+<li><p><strong>callback</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="optimise.routine.BaseOptimiserRoutine.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><em class="sig-param">to_initial=True</em>, <em class="sig-param">routines=None</em>, <em class="sig-param">reset_history=False</em>, <em class="sig-param">reset_static=False</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.BaseOptimiserRoutine.reset" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>to_initial</strong></p></li>
+<li><p><strong>routines</strong></p></li>
+<li><p><strong>reset_history</strong></p></li>
+<li><p><strong>reset_static</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="optimise.routine.BaseOptimiserRoutine.results_mapping">
+<em class="property">static </em><code class="sig-name descname">results_mapping</code><span class="sig-paren">(</span><em class="sig-param">sub_routine_space</em>, <em class="sig-param">results</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.BaseOptimiserRoutine.results_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>sub_routine_space</strong> (<em>dict</em>) – Dictionary of key-value pairs</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sub_routine_space</span> <span class="o">=</span> <span class="p">{</span>
+<span class="go">     ... {</span>
+<span class="go">     ... &quot;categorical__param_1&quot;: [&quot;option1&quot;, &quot;option2&quot;, &quot;option3&quot;],</span>
+<span class="go">     ... &quot;real__param_2&quot;: (0.0, 1.0),</span>
+<span class="go">     ... &quot;integer__param_3&quot;: (0, 100)</span>
+<span class="go">     ... }</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>results</strong> ([<cite>optimiseResult</cite>, scipy object]:) – The optimization result returned as a optimiseResult object.
+Important attributes are:</p>
+<ul class="simple">
+<li><p><cite>x</cite> [list]: location of the minimum.</p></li>
+<li><p><cite>fun</cite> [float]: function value at the minimum.</p></li>
+<li><p><cite>models</cite>: surrogate models used for each iteration.</p></li>
+<li><dl class="simple">
+<dt><cite>x_iters</cite> [list of lists]: location of function evaluation</dt><dd><p>for each iteration.</p>
+</dd>
+</dl>
+</li>
+<li><p><cite>func_vals</cite> [array]: function value for each iteration.</p></li>
+<li><p><cite>space</cite> [Space]: the optimization space.</p></li>
+<li><p><cite>specs</cite> [dict]`: the call specifications.</p></li>
+<li><dl class="simple">
+<dt><cite>rng</cite> [RandomState instance]: State of the random state</dt><dd><p>at the end of minimization.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>For more details related to the optimiseResult object, refer
+<a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimise.optimiseResult.html">http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimise.optimiseResult.html</a></p>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="optimise.routine.SciKitOptOptimiserRoutine">
+<em class="property">class </em><code class="sig-prename descclassname">optimise.routine.</code><code class="sig-name descname">SciKitOptOptimiserRoutine</code><span class="sig-paren">(</span><em class="sig-param">routines=None</em>, <em class="sig-param">function_default=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.SciKitOptOptimiserRoutine" title="Permalink to this definition">¶</a></dt>
+<dd><p># TODO: Add optional load to kwargs for loading.</p>
+<p class="rubric">Notes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>routines [dict, list of dict or list of list of dict]</strong> – The routine parameter can be interpreted three ways for
+hyperparameter optimisation. It should be noted that the
+instantiated class will behave consistently according to
+the logic behind the supplied routine, defined below. There
+are three routine types defined as:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>dict</cite></dt><dd><p>A dictionary can be provided with three keys which
+determine the optimisation logic.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>list</cite></dt><dd><p>A single list</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="optimise.routine.SciKitOptOptimiserRoutine.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">routines=None</em>, <em class="sig-param">function_default=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#optimise.routine.SciKitOptOptimiserRoutine.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p># TODO: Add optional load to kwargs for loading.</p>
+<p class="rubric">Notes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>routines [dict, list of dict or list of list of dict]</strong> – The routine parameter can be interpreted three ways for
+hyperparameter optimisation. It should be noted that the
+instantiated class will behave consistently according to
+the logic behind the supplied routine, defined below. There
+are three routine types defined as:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>dict</cite></dt><dd><p>A dictionary can be provided with three keys which
+determine the optimisation logic.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>list</cite></dt><dd><p>A single list</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-optimise.constructor"></span></div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="problems.html" class="btn btn-neutral float-right" title="mmgpy.problems" accesskey="n">Next →</a>
+      
+      
+        <a href="metamodel.html" class="btn btn-neutral" title="mmgpy.metamodel" accesskey="p">← Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Geoffrey Garrett.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE: 'true'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+    
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #00A6D6;
+    }
+    /* Sidebar */
+    /*.wy-nav-side {*/
+    /*  background: #6B8689;*/
+    /*}*/
+  </style>
+
+
+</body>
+</html>

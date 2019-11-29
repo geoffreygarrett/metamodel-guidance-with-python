@@ -1,0 +1,6 @@
+sampling.halton
+===============
+
+.. currentmodule:: sampling
+
+.. autofunction:: halton
