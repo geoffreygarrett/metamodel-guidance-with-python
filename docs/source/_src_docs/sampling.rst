@@ -7,48 +7,52 @@ The sampling module contains various methods for sampling
 .. toctree::
    :maxdepth: 2
 
+Data Sampling methods
+#####################
+
 Stochastic methods
-##################
+******************
+**Random uniform**\
 
-Random uniform
-**************
-.. automodule:: sampling
-   :members: random_uniform
-   :private-members:
-   :special-members:
-   :noindex:
+- Function: :py:meth:`sampling.random_uniform`
 
-Halton sequences
-****************
-.. automodule:: sampling
-   :members: halton
-   :private-members:
-   :special-members:
-   :noindex:
+**Multivariate normal**\
+
+- Function: :py:meth:`sampling.multivariate_normal`
+
+Deterministic methods
+*********************
+**Halton sequences**\
+
+- Function: :py:meth:`sampling.halton`
 
 Geometric methods
-#################
+*****************
+**Uniform grid**\
 
-Uniform grid
-************
+- Function: :py:meth:`sampling.uniform_grid`
+
+**Full factorial**\
+
+- Function: :py:meth:`sampling.full_factorial`
+
+**Centroidal Voronoi Tessellation**\
+
+- Function: :py:meth:`sampling.cvt`
+
+Non-uniform sampling sampling
+*****************************
+
+Functions
+#########
 .. automodule:: sampling
-   :members: uniform_grid
+   :members:
    :private-members:
    :special-members:
-   :noindex:
 
-Full factorial
-**************
-.. automodule:: sampling
-   :members: full_factorial
+Classes
+#######
+.. autoclass:: sampling.InterpolatedMarginalInverseECDF
+   :members:
    :private-members:
-   :special-members:
-   :noindex:
-
-Centroidal Voronoi Tessellation
-*******************************
-.. automodule:: sampling
-   :members: cvt
-   :private-members:
-   :special-members:
-   :noindex:
+   :special-members: __call__, __init__,

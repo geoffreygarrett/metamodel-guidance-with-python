@@ -21,7 +21,7 @@ def null_mapping(x):
     return x
 
 
-def marginal_inverse_ecdf(p, x, kind='linear', single_x=False, h=1.0):
+def marginal_inverse_ecdf(p, x, kind='linear', single_x=False):
     """
     Parameters
     ----------
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     # print(p)
     # print(p)
 
-    test = InterpolatedMarginalInverseECDF(p**4, x,
+    test = InterpolatedMarginalInverseECDF(p ** 4, x,
                                            kind='linear')
 
     # print(x)

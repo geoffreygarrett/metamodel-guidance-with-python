@@ -89,17 +89,15 @@
                 <p class="caption"><span class="caption-text">Sub-modules</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>mmgpy.sampling</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#stochastic-methods">Stochastic methods</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#random-uniform">Random uniform</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#halton-sequences">Halton sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-sampling-methods">Data Sampling methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stochastic-methods">Stochastic methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deterministic-methods">Deterministic methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geometric-methods">Geometric methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-uniform-sampling-sampling">Non-uniform sampling sampling</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#geometric-methods">Geometric methods</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#uniform-grid">Uniform grid</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#full-factorial">Full factorial</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#centroidal-voronoi-tessellation">Centroidal Voronoi Tessellation</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-sampling">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dataset.html"><strong>mmgpy.dataset</strong></a></li>
@@ -177,13 +175,50 @@
 <p>The sampling module contains various methods for sampling</p>
 <div class="toctree-wrapper compound">
 </div>
+<div class="section" id="data-sampling-methods">
+<h2>Data Sampling methods<a class="headerlink" href="#data-sampling-methods" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="stochastic-methods">
-<h2>Stochastic methods<a class="headerlink" href="#stochastic-methods" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="random-uniform">
-<h3>Random uniform<a class="headerlink" href="#random-uniform" title="Permalink to this headline">¶</a></h3>
+<h3>Stochastic methods<a class="headerlink" href="#stochastic-methods" title="Permalink to this headline">¶</a></h3>
+<p><strong>Random uniform</strong></p>
+<ul class="simple">
+<li><p>Function: <a class="reference internal" href="#sampling.random_uniform" title="sampling.random_uniform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sampling.random_uniform()</span></code></a></p></li>
+</ul>
+<p><strong>Multivariate normal</strong></p>
+<ul class="simple">
+<li><p>Function: <a class="reference internal" href="#sampling.multivariate_normal" title="sampling.multivariate_normal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sampling.multivariate_normal()</span></code></a></p></li>
+</ul>
+</div>
+<div class="section" id="deterministic-methods">
+<h3>Deterministic methods<a class="headerlink" href="#deterministic-methods" title="Permalink to this headline">¶</a></h3>
+<p><strong>Halton sequences</strong></p>
+<ul class="simple">
+<li><p>Function: <a class="reference internal" href="#sampling.halton" title="sampling.halton"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sampling.halton()</span></code></a></p></li>
+</ul>
+</div>
+<div class="section" id="geometric-methods">
+<h3>Geometric methods<a class="headerlink" href="#geometric-methods" title="Permalink to this headline">¶</a></h3>
+<p><strong>Uniform grid</strong></p>
+<ul class="simple">
+<li><p>Function: <a class="reference internal" href="#sampling.uniform_grid" title="sampling.uniform_grid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sampling.uniform_grid()</span></code></a></p></li>
+</ul>
+<p><strong>Full factorial</strong></p>
+<ul class="simple">
+<li><p>Function: <a class="reference internal" href="#sampling.full_factorial" title="sampling.full_factorial"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sampling.full_factorial()</span></code></a></p></li>
+</ul>
+<p><strong>Centroidal Voronoi Tessellation</strong></p>
+<ul class="simple">
+<li><p>Function: <a class="reference internal" href="#sampling.cvt" title="sampling.cvt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sampling.cvt()</span></code></a></p></li>
+</ul>
+</div>
+<div class="section" id="non-uniform-sampling-sampling">
+<h3>Non-uniform sampling sampling<a class="headerlink" href="#non-uniform-sampling-sampling" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="module-sampling">
+<span id="functions"></span><h2>Functions<a class="headerlink" href="#module-sampling" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt>
-<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">random_uniform</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample</em>, <em class="sig-param">seed=None</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span></dt>
+<dt id="sampling.random_uniform">
+<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">random_uniform</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample</em>, <em class="sig-param">seed=None</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.random_uniform" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Random Uniform</strong>:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -198,12 +233,26 @@
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="halton-sequences">
-<h3>Halton sequences<a class="headerlink" href="#halton-sequences" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">halton</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span></dt>
+<dt id="sampling.multivariate_normal">
+<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">multivariate_normal</code><span class="sig-paren">(</span><em class="sig-param">mean</em>, <em class="sig-param">covariance</em>, <em class="sig-param">n_sample</em>, <em class="sig-param">seed=None</em>, <em class="sig-param">form='sx'</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.multivariate_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Multivariate Normal</strong>:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong></p></li>
+<li><p><strong>covariance</strong></p></li>
+<li><p><strong>n_sample</strong></p></li>
+<li><p><strong>seed</strong></p></li>
+<li><p><strong>form</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="sampling.halton">
+<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">halton</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.halton" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Halton</strong>:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -217,15 +266,9 @@
 </dl>
 </dd></dl>
 
-</div>
-</div>
-<div class="section" id="geometric-methods">
-<h2>Geometric methods<a class="headerlink" href="#geometric-methods" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="uniform-grid">
-<h3>Uniform grid<a class="headerlink" href="#uniform-grid" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">uniform_grid</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample</em>, <em class="sig-param">flatten=True</em>, <em class="sig-param">edges=False</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span></dt>
+<dt id="sampling.uniform_grid">
+<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">uniform_grid</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample</em>, <em class="sig-param">flatten=True</em>, <em class="sig-param">edges=False</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.uniform_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Uniform Grid (UG)</strong>:
 Uniform grid (UG) is the simplest sampling method in which the
 samples are created using node points at fixed intervals uniformly
@@ -249,12 +292,9 @@ number of sampling points and high dimensions.</p></li>
 </ul>
 </dd></dl>
 
-</div>
-<div class="section" id="full-factorial">
-<h3>Full factorial<a class="headerlink" href="#full-factorial" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">full_factorial</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample_tuple</em>, <em class="sig-param">flatten=True</em>, <em class="sig-param">edges=True</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span></dt>
+<dt id="sampling.full_factorial">
+<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">full_factorial</code><span class="sig-paren">(</span><em class="sig-param">bounds</em>, <em class="sig-param">n_sample_tuple</em>, <em class="sig-param">flatten=True</em>, <em class="sig-param">edges=True</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.full_factorial" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Custom Grid (CG)</strong>:
 This Grid method is the sample as the UG method, but allows for
 non-uniform grid sampling.</p>
@@ -277,12 +317,9 @@ number of sampling points and high dimensions.</p></li>
 </ul>
 </dd></dl>
 
-</div>
-<div class="section" id="centroidal-voronoi-tessellation">
-<h3>Centroidal Voronoi Tessellation<a class="headerlink" href="#centroidal-voronoi-tessellation" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">cvt</code><span class="sig-paren">(</span><em class="sig-param">xdim</em>, <em class="sig-param">gdim</em>, <em class="sig-param">initialize=&lt;function halton&gt;</em>, <em class="sig-param">sample=&lt;function random_uniform&gt;</em>, <em class="sig-param">sample_num=1000</em>, <em class="sig-param">iterations=5</em>, <em class="sig-param">seed=None</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span></dt>
+<dt id="sampling.cvt">
+<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">cvt</code><span class="sig-paren">(</span><em class="sig-param">xdim</em>, <em class="sig-param">gdim</em>, <em class="sig-param">initialize=&lt;function halton&gt;</em>, <em class="sig-param">sample=&lt;function random_uniform&gt;</em>, <em class="sig-param">sample_num=1000</em>, <em class="sig-param">iterations=5</em>, <em class="sig-param">seed=None</em>, <em class="sig-param">form='sx'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.cvt" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Centroidal Voronoi Tessellation</strong>:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -301,7 +338,101 @@ number of sampling points and high dimensions.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="function">
+<dt id="sampling.marginal_inverse_ecdf">
+<code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">marginal_inverse_ecdf</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">x</em>, <em class="sig-param">kind='linear'</em>, <em class="sig-param">single_x=False</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.marginal_inverse_ecdf" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>ndarray, shape (samples,)</em>) – Determines the (un)normalized probability distribution to be
+sampled. Will be normalized for integral value of 1 for the
+empirical distribution function.</p></li>
+<li><p><strong>x</strong> (<em>ndarray, shape (samples, input_dimension)</em>)</p></li>
+<li><p><strong>kind</strong> (<em>str or int, optional</em>) – Specifies the kind of interpolation as a string
+(‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’,
+‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and
+‘cubic’ refer to a spline interpolation of zeroth, first,
+second or third order; ‘previous’ and ‘next’ simply return
+the previous or next value of the point) or as an integer
+specifying the order of the spline interpolator to use.
+(Default is ‘linear’).</p></li>
+<li><p><strong>single_x</strong> (<em>True or False, optional</em>) – Specifies the possibility to return a single callable if the
+input dimension of len(x) == 1 (Default is False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>marginal_inverse_ecdf</strong> – shape, x.shape[-1]
+Returns the list of callable inverse empirical distribution
+functions.
+<a class="reference external" href="https://en.wikipedia.org/wiki/Empirical_distribution_function">https://en.wikipedia.org/wiki/Empirical_distribution_function</a></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple of function</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sampling.InterpolatedMarginalInverseECDF">
+<em class="property">class </em><code class="sig-prename descclassname">sampling.</code><code class="sig-name descname">InterpolatedMarginalInverseECDF</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">x</em>, <em class="sig-param">kind='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.InterpolatedMarginalInverseECDF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolated Marginal Inverse of the empirical cumulative
+distribution function of p.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>ndarray, shape (samples,)</em>) – Determines the (un)normalized probability distribution
+to be sampled. Will be normalized for integral value of 1
+for the empirical distribution function.</p></li>
+<li><p><strong>x</strong> (<em>ndarray, shape (samples, input_dimension)</em>)</p></li>
+<li><p><strong>kind</strong> (<em>str or int, optional</em>) – Specifies the kind of interpolation as a string
+(‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’,
+‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’,
+‘quadratic’ and ‘cubic’ refer to a spline interpolation of
+zeroth, first, second or third order; ‘previous’ and ‘next’
+simply return the previous or next value of the point) or
+as an integer specifying the order of the spline
+interpolator to use.
+(Default is ‘linear’).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="sampling.InterpolatedMarginalInverseECDF.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">u</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.InterpolatedMarginalInverseECDF.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call self as a function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sampling.InterpolatedMarginalInverseECDF.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">x</em>, <em class="sig-param">kind='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#sampling.InterpolatedMarginalInverseECDF.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolated Marginal Inverse of the empirical cumulative
+distribution function of p.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>ndarray, shape (samples,)</em>) – Determines the (un)normalized probability distribution
+to be sampled. Will be normalized for integral value of 1
+for the empirical distribution function.</p></li>
+<li><p><strong>x</strong> (<em>ndarray, shape (samples, input_dimension)</em>)</p></li>
+<li><p><strong>kind</strong> (<em>str or int, optional</em>) – Specifies the kind of interpolation as a string
+(‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’,
+‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’,
+‘quadratic’ and ‘cubic’ refer to a spline interpolation of
+zeroth, first, second or third order; ‘previous’ and ‘next’
+simply return the previous or next value of the point) or
+as an integer specifying the order of the spline
+interpolator to use.
+(Default is ‘linear’).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
