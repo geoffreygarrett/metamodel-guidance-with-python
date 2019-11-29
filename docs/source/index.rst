@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 **mmgpy** module
-################
+================
 
 Metamodel Guidance with Python, or **mmgpy**, is a library to provide metamodelling (or surrogate modelling)
 capabilities of expensive black-box functions for the purpose of guidance optimisation, through the use of machine
@@ -12,13 +12,7 @@ learning. It has been developed during my internship at Airbus Defence and Space
 Kristen Lagadec.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Functions
-   :titlesonly:
-
-
-.. toctree::
-   :maxdepth: 2
+   :maxdepth: 20
    :caption: Sub-modules
    :titlesonly:
 

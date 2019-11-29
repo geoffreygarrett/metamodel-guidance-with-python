@@ -35,6 +35,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
+    'sphinx.ext.autosummary',
     'sphinx.ext.autosummary'
 ]
 source_suffix = '.rst'
@@ -45,6 +46,9 @@ autoclass_content = "both"
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+
+autodoc_default_flags = ['members']
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -59,7 +63,12 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+# html_theme = 'sphinx_rtd_theme'
+import rtcat_sphinx_theme
+
+html_theme = "rtcat_sphinx_theme"
+
+html_theme_path = [rtcat_sphinx_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
