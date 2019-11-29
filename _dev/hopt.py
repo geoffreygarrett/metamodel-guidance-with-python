@@ -1,10 +1,10 @@
 import skopt
-from src.surrogate.sampling import halton
-from src.surrogate.sampling import random_uniform
-from src.utils import TQDMSkoptCallable
+from mmgpy.surrogate.sampling import halton
+from mmgpy.surrogate.sampling import random_uniform
+from mmgpy.utils import TQDMSkoptCallable
 
-from src.surrogate.test import TestFunctionSet2DInputSpace as F2D
-from src.surrogate.test import TestFunctionSetNDInputSpace as FND
+from mmgpy.surrogate.test import TestFunctionSet2DInputSpace as F2D
+from mmgpy.surrogate.test import TestFunctionSetNDInputSpace as FND
 from sklearn.svm import SVR as sklearnSVR
 
 SPACE = [skopt.space.Real(1e-4, 1e3, name='gamma'),

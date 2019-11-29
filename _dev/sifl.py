@@ -1,6 +1,6 @@
-from src.surrogate.algorithms import ssifl2
-from src.surrogate.meta_models import RandomForestRegression, SupportVectorRegression, FeedForwardNNRegression
-from src.surrogate.test import TestFunctionSet2DInputSpace
+from algorithms import ssifl2
+from metamodel import SupportVectorRegression
+from mmgpy.surrogate.test import TestFunctionSet2DInputSpace
 
 F2D = TestFunctionSet2DInputSpace()
 
