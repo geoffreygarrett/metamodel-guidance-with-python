@@ -1,0 +1,575 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mmgpy.benchmark &mdash; mmgpy 0.8.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="mmgpy 0.8.0 documentation" href="../index.html"/>
+        <link rel="next" title="Testing titles" href="../_src_notebooks/HOPT - Sampling Importance.html"/>
+        <link rel="prev" title="mmgpy.plotting" href="plotting.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> mmgpy
+          
+
+          
+            
+            <img src="../_static/logos.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Sub-modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sampling.html"><strong>mmgpy.sampling</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html"><strong>mmgpy.dataset</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="matlab_.html"><strong>mmgpy.matlab</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="metamodel.html"><strong>mmgpy.metamodel</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimise.html"><strong>mmgpy.optimise</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="problems.html"><strong>mmgpy.problems</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html"><strong>mmgpy.plotting</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>mmgpy.benchmark</strong></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_src_notebooks/HOPT - Sampling Importance.html">Testing titles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_src_notebooks/SSIFL training.html">SSIFL</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mmgpy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><strong>mmgpy.benchmark</strong></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_src_docs/benchmark.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mmgpy-benchmark">
+<h1><strong>mmgpy.benchmark</strong><a class="headerlink" href="#mmgpy-benchmark" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="benchmark.TestFunction">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">TestFunction</code><a class="headerlink" href="#benchmark.TestFunction" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.TestFunction.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunction.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call self as a function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="benchmark.TestFunction.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunction.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="benchmark.TestFunction.__str__">
+<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunction.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="benchmark.TestFunction.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#benchmark.TestFunction.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Rastrigin">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Rastrigin</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Rastrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rastrigin, L. A. “Systems of extremal control.” Mir, Moscow (1974).</p>
+<dl class="method">
+<dt id="benchmark.Rastrigin.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Rastrigin.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Ackley">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Ackley</code><a class="headerlink" href="#benchmark.Ackley" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ackley, D. H. (1987) “A connectionist machine for genetic hillclimbing”, Kluwer Academic Publishers, Boston MA.</p>
+<dl class="method">
+<dt id="benchmark.Ackley.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Ackley.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Sphere">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Sphere</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Sphere" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.Sphere.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Sphere.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Rosenbrock">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Rosenbrock</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Rosenbrock" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.Rosenbrock.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Rosenbrock.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Beale">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Beale</code><a class="headerlink" href="#benchmark.Beale" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.Beale.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Beale.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.GoldsteinPrice">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">GoldsteinPrice</code><a class="headerlink" href="#benchmark.GoldsteinPrice" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.GoldsteinPrice.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.GoldsteinPrice.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Booth">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Booth</code><a class="headerlink" href="#benchmark.Booth" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.Booth.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Booth.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.BukinN6">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">BukinN6</code><a class="headerlink" href="#benchmark.BukinN6" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.BukinN6.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.BukinN6.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Matyas">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Matyas</code><a class="headerlink" href="#benchmark.Matyas" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.Matyas.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Matyas.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.LeviN13">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">LeviN13</code><a class="headerlink" href="#benchmark.LeviN13" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.LeviN13.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.LeviN13.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="benchmark.LeviN13.__str__">
+<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.LeviN13.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Himmelblau">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Himmelblau</code><a class="headerlink" href="#benchmark.Himmelblau" title="Permalink to this definition">¶</a></dt>
+<dd><p>Himmelblau, D. (1972). Applied Nonlinear Programming. McGraw-Hill. ISBN 0-07-028921-2.</p>
+<dl class="method">
+<dt id="benchmark.Himmelblau.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Himmelblau.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.ThreeHumpCamel">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">ThreeHumpCamel</code><a class="headerlink" href="#benchmark.ThreeHumpCamel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.ThreeHumpCamel.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.ThreeHumpCamel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Easom">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Easom</code><a class="headerlink" href="#benchmark.Easom" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.Easom.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Easom.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.CrossInTray">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">CrossInTray</code><a class="headerlink" href="#benchmark.CrossInTray" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.CrossInTray.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.CrossInTray.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.Eggholder">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">Eggholder</code><a class="headerlink" href="#benchmark.Eggholder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.Eggholder.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.Eggholder.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.HolderTable">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">HolderTable</code><a class="headerlink" href="#benchmark.HolderTable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.HolderTable.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.HolderTable.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.McCormick">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">McCormick</code><a class="headerlink" href="#benchmark.McCormick" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.McCormick.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.McCormick.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.SchafferN2">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">SchafferN2</code><a class="headerlink" href="#benchmark.SchafferN2" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.SchafferN2.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.SchafferN2.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call self as a function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="benchmark.SchafferN2.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.SchafferN2.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.SchafferN4">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">SchafferN4</code><a class="headerlink" href="#benchmark.SchafferN4" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.SchafferN4.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.SchafferN4.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.StyblinskiTang">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">StyblinskiTang</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.StyblinskiTang" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.StyblinskiTang.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">*x</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.StyblinskiTang.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call self as a function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="benchmark.StyblinskiTang.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.StyblinskiTang.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.GarrettLagadec">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">GarrettLagadec</code><span class="sig-paren">(</span><em class="sig-param">n</em>, <em class="sig-param">lam=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.GarrettLagadec" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.GarrettLagadec.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">n</em>, <em class="sig-param">lam=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.GarrettLagadec.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.TestFunctionSet2DInputSpace">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">TestFunctionSet2DInputSpace</code><a class="headerlink" href="#benchmark.TestFunctionSet2DInputSpace" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.TestFunctionSet2DInputSpace.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunctionSet2DInputSpace.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="benchmark.TestFunctionSet2DInputSpace.__str__">
+<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunctionSet2DInputSpace.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="benchmark.TestFunctionSet2DInputSpace.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#benchmark.TestFunctionSet2DInputSpace.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="benchmark.TestFunctionSetNDInputSpace">
+<em class="property">class </em><code class="sig-prename descclassname">benchmark.</code><code class="sig-name descname">TestFunctionSetNDInputSpace</code><span class="sig-paren">(</span><em class="sig-param">N</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunctionSetNDInputSpace" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="benchmark.TestFunctionSetNDInputSpace.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">N</em><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunctionSetNDInputSpace.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="benchmark.TestFunctionSetNDInputSpace.__str__">
+<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#benchmark.TestFunctionSetNDInputSpace.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="benchmark.TestFunctionSetNDInputSpace.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#benchmark.TestFunctionSetNDInputSpace.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../_src_notebooks/HOPT - Sampling Importance.html" class="btn btn-neutral float-right" title="Testing titles" accesskey="n">Next →</a>
+      
+      
+        <a href="plotting.html" class="btn btn-neutral" title="mmgpy.plotting" accesskey="p">← Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Geoffrey Garrett.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE: 'true'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+    
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #00A6D6;
+    }
+    /* Sidebar */
+    /*.wy-nav-side {*/
+    /*  background: #6B8689;*/
+    /*}*/
+  </style>
+
+
+</body>
+</html>
