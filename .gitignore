@@ -5,6 +5,7 @@ libs/
 data/
 simulation/data
 models/
+
 CMakeFiles/
 _CPack_Packagess
 /
@@ -23,6 +24,7 @@ boost-numpy-eigen-*-Linux.tar.gz
 *.pyc
 *.sv
 __pycache__/
+.ipynb_checkpoints/
 
 # Common build output folders
 cmake-build-debug/

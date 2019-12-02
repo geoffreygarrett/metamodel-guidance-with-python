@@ -1,6 +1,6 @@
 
 **mmgpy.algorithm**
-*******************
+===================
 
 .. automodule:: algorithm
    :members:

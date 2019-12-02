@@ -1,5 +1,6 @@
+
 **mmgpy.metamodel**
-*******************
+===================
 
 The **metamodel** module provides the surrogate models available for the metamodelling process. Currently supported
 regression models are the following.

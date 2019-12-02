@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="_src_docs/metamodel.html"><strong>mmgpy.metamodel</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="_src_docs/optimise.html"><strong>mmgpy.optimise</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="_src_docs/problems.html"><strong>mmgpy.problems</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/plots.html"><strong>mmgpy.plots</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="_src_docs/plotting.html"><strong>mmgpy.plotting</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="_src_docs/benchmark.html"><strong>mmgpy.benchmark</strong></a></li>
 </ul>
 <p class="caption"><span class="caption-text">Notebooks</span></p>
@@ -164,41 +164,19 @@
 capabilities of expensive black-box functions for the purpose of guidance optimisation, through the use of machine
 learning. It has been developed during my internship at Airbus Defence and Space in Toulouse under the supervision of
 Kristen Lagadec.</p>
+<div class="section" id="metamodelling-the-2d-rastrigin-function">
+<h2>Metamodelling the 2D Rastrigin Function<a class="headerlink" href="#metamodelling-the-2d-rastrigin-function" title="Permalink to this headline">¶</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mmgpy.benchmark</span> <span class="k">import</span> <span class="n">Rastrigin</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mmgpy.algorithm</span> <span class="k">import</span> <span class="n">EasySSIFL</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mmgpy.plotting</span> <span class="k">import</span> <span class="n">make_ssifl_gif</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rastrigin2D</span> <span class="o">=</span> <span class="n">Rastrigin</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          <span class="c1"># Define a callable function.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ssifl</span> <span class="o">=</span> <span class="n">EasySSIFL</span><span class="p">(</span><span class="n">rastrigin2D</span><span class="p">)</span>      <span class="c1"># Setup incremental learning algorithm.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n">ssifl</span><span class="o">.</span><span class="n">iterate_to</span><span class="p">(</span><span class="n">accuracy</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">make_ssifl_gif</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
 <img alt="_images/incremental.gif" src="_images/incremental.gif" />
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Sub-modules</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/sampling.html"><strong>mmgpy.sampling</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/sampling.html#data-sampling-methods">Data Sampling methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/sampling.html#module-sampling">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/sampling.html#classes">Classes</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/dataset.html"><strong>mmgpy.dataset</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/matlab_.html"><strong>mmgpy.matlab</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/matlab_.html#running-matlab-simulink-in-python">Running MATLAB &amp; Simulink in Python</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/matlab_.html#importing-trained-models-into-matlab">Importing trained models into MATLAB</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/metamodel.html"><strong>mmgpy.metamodel</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/metamodel.html#general-regression-models">General regression models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/metamodel.html#series-regression-models">Series regression models</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/optimise.html"><strong>mmgpy.optimise</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/optimise.html#constructors">Constructors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/optimise.html#routines">Routines</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/problems.html"><strong>mmgpy.problems</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/problems.html#bicycle-guidance">Bicycle guidance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/problems.html#d-attitude-guidance">2D attitude guidance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_src_docs/problems.html#module-problems">3D attitude guidance</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/plots.html"><strong>mmgpy.plots</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="_src_docs/benchmark.html"><strong>mmgpy.benchmark</strong></a></li>
-</ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Notebooks</span></p>
@@ -210,6 +188,7 @@ Kristen Lagadec.</p>
 </ul>
 </li>
 </ul>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">

@@ -1,7 +1,7 @@
 .. guidepy documentation master file, created by
-   sphinx-quickstart on Thu Nov 28 11:06:55 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+    sphinx-quickstart on Thu Nov 28 11:06:55 2019.
+    You can adapt this file completely to your liking, but it should at least
+    contain the root `toctree` directive.
 
 **mmgpy** module
 ================
@@ -11,11 +11,24 @@ capabilities of expensive black-box functions for the purpose of guidance optimi
 learning. It has been developed during my internship at Airbus Defence and Space in Toulouse under the supervision of
 Kristen Lagadec.
 
+
+Metamodelling the 2D Rastrigin Function
+#######################################
+
+>>> from mmgpy.benchmark import Rastrigin
+>>> from mmgpy.algorithm import EasySSIFL
+>>> from mmgpy.plotting import make_ssifl_gif
+>>> rastrigin2D = Rastrigin(2)          # Define a callable function.
+>>> ssifl = EasySSIFL(rastrigin2D)      # Setup incremental learning algorithm.
+>>> results = ssifl.iterate_to(accuracy=0.1, confidence=0.95)
+>>> make_ssifl_gif(results)
+
 .. image:: _static/incremental.gif
 
 .. toctree::
    :maxdepth: 2
    :caption: Sub-modules
+   :hidden:
 
    _src_docs/sampling
    _src_docs/dataset
@@ -24,7 +37,7 @@ Kristen Lagadec.
    _src_docs/algorithm
    _src_docs/optimise
    _src_docs/problems
-   _src_docs/plots
+   _src_docs/plotting
    _src_docs/benchmark
 
 .. toctree::

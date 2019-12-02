@@ -1,6 +1,6 @@
 
 **mmgpy.matlab**
-****************
+================
 
 This module consists of functions and classes which aim towards linking the environment of MATLAB to the metamodelling
 environment in Python. The two versions which are used and demonstrated for are R2015b and R2019b. There are two main

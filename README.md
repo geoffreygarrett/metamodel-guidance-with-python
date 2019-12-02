@@ -21,10 +21,6 @@ git clone
 
 ## License
 
-## Project Structure
-
-
-
 # Surrogate modelling with neural networks for expensive high dimensional data
 
 ## Literature Review 

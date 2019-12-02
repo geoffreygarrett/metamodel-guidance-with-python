@@ -1,5 +1,6 @@
+
 **mmgpy.benchmark**
-*******************
+===================
 
 .. autoclass:: benchmark.TestFunction
    :members:
