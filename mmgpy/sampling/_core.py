@@ -1,4 +1,3 @@
-import numpy as np
 from ._sampling import _uniform_grid
 from ._sampling import _full_factorial
 from ._sampling import _halton
@@ -6,14 +5,9 @@ from ._sampling import _random_uniform
 from ._sampling import _multivariate_normal
 from ._sampling import _cvt
 
-"""
-**GEOMETRIC**
-"""
-
 
 def uniform_grid(bounds, n_sample, flatten=True, edges=False, form="sx",
                  **kwargs):
-
     """**Uniform Grid (UG)**:
     Uniform grid (UG) is the simplest sampling method in which the
     samples are created using node points at fixed intervals uniformly
@@ -37,16 +31,7 @@ def uniform_grid(bounds, n_sample, flatten=True, edges=False, form="sx",
     -------
 
     """
-    """
 
-
-    :param bounds:
-    :param n_sample:
-    :param flatten:
-    :param edges:
-    :param components_across: Ignored if flatten=True.
-    :return:
-    """
     return _uniform_grid(bounds, n_sample, flatten, edges, form)
 
 

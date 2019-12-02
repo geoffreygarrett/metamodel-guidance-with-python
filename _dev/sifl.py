@@ -1,4 +1,4 @@
-from algorithms import ssifl2
+from algorithm import ssifl2
 from metamodel import SupportVectorRegression
 from mmgpy.surrogate.test import TestFunctionSet2DInputSpace
 

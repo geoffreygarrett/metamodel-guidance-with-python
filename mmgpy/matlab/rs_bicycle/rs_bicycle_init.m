@@ -1,11 +1,11 @@
-clear all;
-
 % Parameters.
 g              = Simulink.Parameter(9.81);  % [m/s/s]
 init_position  = Simulink.Parameter(0.0);   % [m]
 init_velocity  = Simulink.Parameter(0.0);   % [m/s]
 duration       = Simulink.Parameter(200.0); % [s]
 limit_velocity = Simulink.Parameter(60.0);  % [m/s]
+vel = [0,0;
+    0,0];
 
 % Environment parameters.
 env_route_length = 1000;                      % [m]

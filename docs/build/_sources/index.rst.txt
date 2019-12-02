@@ -17,12 +17,13 @@ Kristen Lagadec.
 
    _src_docs/sampling
    _src_docs/dataset
-   _src_docs/matlab
+   _src_docs/matlab_
    _src_docs/metamodel
+   _src_docs/algorithm
    _src_docs/optimise
    _src_docs/problems
    _src_docs/plots
-   _src_docs/test
+   _src_docs/benchmark
 
 .. toctree::
    :maxdepth: 2

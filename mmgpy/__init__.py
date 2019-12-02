@@ -1,5 +1,4 @@
 import os
-from surrogate import sampling
 
 DATA_DIR = os.path.join(os.getcwd(), "../data")
 TRAINED_MODELS_DIR = os.path.join(os.getcwd(), "../models")
@@ -11,4 +10,5 @@ __all__ = ["sampling",
            "optimise",
            "metamodel",
            "matlab",
-           "plots",]
+           "plots",
+           "benchmark"]

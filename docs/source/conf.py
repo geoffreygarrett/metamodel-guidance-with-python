@@ -37,7 +37,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'sphinx.ext.autosummary',
-    'sphinx.ext.graphviz'
+    'sphinx.ext.graphviz',
+    'sphinxcontrib.bibtex'
 ]
 source_suffix = '.rst'
 master_doc = 'index'
@@ -47,6 +48,7 @@ autoclass_content = "both"
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+latex_engine = 'xelatex'
 
 autodoc_default_flags = ['members']
 autosummary_generate = True
