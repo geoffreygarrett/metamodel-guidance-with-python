@@ -1,23 +1,28 @@
-# Machine Learning Meta-model for Complex Guidance Problems
+# Metamodelling for Complex Guidance Problems
 
-- [Stagiare] RFP 10422645 – Geoffrey Garrett – Date de début : 08/07/2019
+Metamodel Guidance with Python, or **mmgpy**, is a library to provide metamodelling (or surrogate modelling)
+capabilities of expensive black-box functions for the purpose of guidance optimisation, through the use of machine
+learning. It has been developed during my internship at Airbus Defence and Space in Toulouse under the supervision of
+Kristen Lagadec.
 
+![](docs/source/_static/incremental.gif)
+
+## Installation
+
+``
+git clone 
+``
+
+## Usage
+
+
+## Contributing
+
+
+## License
 
 ## Project Structure
 
-```
-NB10422645/
-├── data        # Directory that data is generated/downloaded to.
-├── models      # Directory containing generated models.
-├── notebooks   # Location of all work and research available for download.
-├── README.md   
-├── reference   # PDF Resources used, all saved on Mendeley.
-├── setup.py    # Setup file for compiling Cython files.
-└── src
-    ├── notebooks    # Source files for notebooks.
-    ├── problems     # Source files for defined problems.
-    └── surrogate    # Source files for surrogate modelling.
-```
 
 
 # Surrogate modelling with neural networks for expensive high dimensional data

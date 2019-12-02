@@ -3,7 +3,7 @@ import numpy as np
 from scipy import fftpack
 import matplotlib.pyplot as plt
 from .uninformed import grid_sample_domain
-from plots.util import plotFFTPeak
+from plotting.util import plotFFTPeak
 
 
 def dft_peaks(func, bounds, n_sample_dim, target=None, plot=False,

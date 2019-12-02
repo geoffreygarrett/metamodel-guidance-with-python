@@ -11,6 +11,8 @@ capabilities of expensive black-box functions for the purpose of guidance optimi
 learning. It has been developed during my internship at Airbus Defence and Space in Toulouse under the supervision of
 Kristen Lagadec.
 
+.. image:: _static/incremental.gif
+
 .. toctree::
    :maxdepth: 2
    :caption: Sub-modules

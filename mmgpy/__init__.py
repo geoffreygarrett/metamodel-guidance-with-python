@@ -10,5 +10,5 @@ __all__ = ["sampling",
            "optimise",
            "metamodel",
            "matlab",
-           "plots",
+           "plotting",
            "benchmark"]
