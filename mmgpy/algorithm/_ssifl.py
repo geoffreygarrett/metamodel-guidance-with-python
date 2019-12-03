@@ -630,6 +630,7 @@ class SSIFL(BaseIncrementalFunctionLearning):
 
         else:
             x_new = None
+            f_new = None
         # Logging
         if self._logging == 0:
             # Minimum logging level.
@@ -648,9 +649,11 @@ class SSIFL(BaseIncrementalFunctionLearning):
                       importance=importance,
                       hopt=hopt,
                       cumulative=cumulative,
+                      x_new=x_new,
+                      f_new=f_new,
                       delta=self.delta,
                       epsilon=self.epsilon,
-                      hyperparams=self.meta_model.hyper_params)
+                      hyperparams=self.meta_model.hyperparameters)
             # self._log()
         elif self._logging == 2:
             raise NotImplementedError

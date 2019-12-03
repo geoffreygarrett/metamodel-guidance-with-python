@@ -11,17 +11,46 @@ capabilities of expensive black-box functions for the purpose of guidance optimi
 learning. It has been developed during my internship at Airbus Defence and Space in Toulouse under the supervision of
 Kristen Lagadec.
 
+Explore the target function
+###########################
 
-Metamodelling the 2D Rastrigin Function
-#######################################
+.. code-block:: python3
 
->>> from mmgpy.benchmark import Rastrigin
->>> from mmgpy.algorithm import EasySSIFL
->>> from mmgpy.plotting import make_ssifl_gif
->>> rastrigin2D = Rastrigin(2)          # Define a callable function.
->>> ssifl = EasySSIFL(rastrigin2D)      # Setup incremental learning algorithm.
->>> results = ssifl.iterate_to(accuracy=0.1, confidence=0.95)
->>> make_ssifl_gif(results)
+    from mmgpy.benchmark import Rastrigin
+    from mmgpy.sampling import uniform_grid
+    from mmgpy.plotting import plot_3d_surface
+
+    # Define a callable target function.
+    rastrigin2D = Rastrigin(2)
+
+    # Sample the domain with uniform grid sampling.
+    x1, x2 = uniform_grid(2, 100, flatten=False)
+
+    # Plot the 3D surface response.
+    plot_3d_surface(x1, x2, rastrigin2D(x1, x2))
+
+.. raw:: html
+    :file: _static/example1.html
+
+Learn the target function
+#########################
+
+.. code-block:: python3
+
+    from mmgpy.algorithm import EasySSIFL
+    from mmgpy.plotting import make_ssifl_gif
+
+    # Define a callable target function.
+    rastrigin2D = Rastrigin(2)
+
+    # Choose learning algorithm.
+    ssifl = EasySSIFL(rastrigin2D)
+
+    # Iterate to desired accuracy and confidence.
+    results = ssifl.iterate_to(accuracy=0.1, confidence=0.95)
+
+    # Make gif of learning.
+    make_ssifl_gif(results)
 
 .. image:: _static/incremental.gif
 
