@@ -11,9 +11,8 @@ capabilities of expensive black-box functions for the purpose of guidance optimi
 learning. It has been developed during my internship at Airbus Defence and Space in Toulouse under the supervision of
 Kristen Lagadec.
 
-
-Metamodelling the 2D Rastrigin Function
-#######################################
+Learning how to Rastrigin in 2D
+###############################
 
 >>> from mmgpy.benchmark import Rastrigin
 >>> from mmgpy.algorithm import EasySSIFL

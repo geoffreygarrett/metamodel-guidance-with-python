@@ -329,6 +329,11 @@ class BaseIncrementalFunctionLearning:
         self._not_implemented()
 
 
+# class BaseSSIFL(BaseIncrementalFunctionLearning):
+#
+#     def __init__(self):
+
+
 class SSIFL(BaseIncrementalFunctionLearning):
 
     def __init__(self, func, x_dim, meta_model, delta, epsilon,
@@ -407,7 +412,6 @@ class SSIFL(BaseIncrementalFunctionLearning):
 
         self.delta = delta
         self.epsilon = epsilon
-        # self.meta_model.static_params['epsilon'] = 0.975 * epsilon
 
         # Determine initial design of experiments based of s_pacc.
         self._s_min = s_pacc(self.epsilon, self.delta)
@@ -473,21 +477,22 @@ class SSIFL(BaseIncrementalFunctionLearning):
 
         Parameters
         ----------
-        cumulative : bool, optional
-        importance : {'none', 'error', 'max', 'min'}
-        tdmq : bool, optional
-            Progress bar in jupyter lab environment (default = False).
-        verbose : int or bool, optional
-            Sets verbosity of iterations of algorithm. True for each
-            iteration to be printed, integer value for frequency of
-            iterations to be printed.
+
+        * kwargs : [optional]
+            - cumulative : bool, optional
+            - importance : {'none', 'error', 'max', 'min'}
+            - tdmq : bool, optional
+                Progress bar in jupyter lab environment (default = False).
+            - verbose : int or bool, optional
+                Sets verbosity of iterations of algorithm. True for each
+                iteration to be printed, integer value for frequency of
+                iterations to be printed.
 
 
         Returns
         -------
 
         """
-
         cumulative = self.algorithm_settings["cumulative"]
         importance = self.algorithm_settings["importance"]
         tdmq = self.algorithm_settings["tdmq"]
