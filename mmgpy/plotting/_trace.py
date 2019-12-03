@@ -26,8 +26,9 @@ class TraceManager:
                                 # eye=dict(x=1.25, y=1.25, z=1.25),
                             ),
                             xaxis=dict(title="test"),
-                            title=name, autosize=False,
-                            width=620, height=580,
+                            title=name, autosize=True,
+                            # width=620, height=580,
+                            # autosize=True,
                             margin=dict(l=65, r=50, b=65, t=90)
                             )
 

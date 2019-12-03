@@ -32,8 +32,8 @@ Explore the target function
 .. raw:: html
     :file: _static/example1.html
 
-Learn the target function
-#########################
+Meta-model the target function
+##############################
 
 .. code-block:: python3
 
@@ -53,6 +53,14 @@ Learn the target function
     make_ssifl_gif(results)
 
 .. image:: _static/incremental.gif
+
+
+Optimise the meta-model
+#######################
+
+
+Analyse the surrogate optimum
+#############################
 
 .. toctree::
    :maxdepth: 2
