@@ -47,7 +47,7 @@ Meta-model the target function
     ssifl = EasySSIFL(rastrigin2D)
 
     # Iterate to desired accuracy and confidence.
-    results = ssifl.iterate_to(accuracy=0.1, confidence=0.95)
+    results = ssifl.iterate_to(accuracy=0.1, confidence=0.99)
 
     # Make gif of learning.
     make_ssifl_gif(results)

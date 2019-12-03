@@ -29,7 +29,7 @@ class TraceManager:
                             title=name, autosize=True,
                             # width=620, height=580,
                             # autosize=True,
-                            margin=dict(l=65, r=50, b=65, t=90)
+                            # margin=dict(l=65, r=50, b=65, t=90)
                             )
 
         self._data = []
