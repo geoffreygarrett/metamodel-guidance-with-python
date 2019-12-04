@@ -1,4 +1,4 @@
-from metamodel._base import SurrogateModelBaseRegression
+from ._base import SurrogateModelBaseRegression
 from sklearn.svm import SVR as sklearnSVR
 
 DEFAULT_SVR_PARAMS = {

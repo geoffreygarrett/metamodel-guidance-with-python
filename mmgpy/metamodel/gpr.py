@@ -1,4 +1,4 @@
-from metamodel._base import SurrogateModelBaseRegression
+from ._base import SurrogateModelBaseRegression
 from sklearn.gaussian_process import GaussianProcessRegressor as sklearnGPR
 from sklearn.gaussian_process.kernels import Matern
 

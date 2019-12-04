@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 
-from metamodel._base import SurrogateModelBaseRegression
-from metamodel.deeplearning import Trainer3
-from metamodel.deeplearning.util import LutzPrecheltEarlyStopping
-from metamodel.modules import RegressionOutput
-from metamodel.modules import ResidualBlock
-from metamodel.modules import activation_dict
+from ._base import SurrogateModelBaseRegression
+from .deeplearning import Trainer3
+from .deeplearning.util import LutzPrecheltEarlyStopping
+from .modules import RegressionOutput
+from .modules import ResidualBlock
+from .modules import activation_dict
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

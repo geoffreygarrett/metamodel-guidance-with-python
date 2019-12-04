@@ -1,4 +1,4 @@
-from metamodel._base import SurrogateModelBaseRegression
+from ._base import SurrogateModelBaseRegression
 from sklearn.ensemble.forest import RandomForestRegressor as sklearnRFR
 
 DEFAULT_RFR_PARAMS = {
