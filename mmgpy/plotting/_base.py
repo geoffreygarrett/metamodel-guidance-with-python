@@ -1,4 +1,4 @@
-from ._trace import *
+from mmgpy.plotting._trace import *
 import imageio
 
 
