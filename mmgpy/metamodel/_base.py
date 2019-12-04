@@ -93,6 +93,7 @@ class SurrogateModelBaseRegression(SciKitOptOptimiserRoutine):
                 validation_dataset = self.prepare_dataset(x_val, y_val)
             else:
                 validation_dataset = self.prepare_dataset(x, y)
+
             trainer = self._trainer_cls(
                 **trainer_hyperparameters,
                 training_dataset=train_dataset,

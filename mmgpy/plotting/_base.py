@@ -2,10 +2,11 @@ from plotting._trace import *
 import imageio
 
 
-def _image_files_to_gif(filenames, save_path):
+def _image_files_to_gif(folder, save_path):
     images = []
+    filenames = os.listdir(folder)
     for filename in filenames:
-        images.append(imageio.imread("ssifl_test/" + filename))
+        images.append(imageio.imread(os.path.join(folder, filename)))
     if save_path.split(".")[-1] != 'gif':
         save_path = f'{save_path}.gif'
     else:
@@ -46,65 +47,73 @@ if __name__ == "__main__":
 
     import os
 
-    _image_files_to_gif(os.listdir("./ssifl_test"), "./test.gif")
+    # _image_files_to_gif(os.listdir("./ssifl_test"), "./test.gif")
     # x = np.linspace(0, 1, 100)
     # y = np.linspace(0, 1, 100)
     # x, y = np.meshgrid(x, y)
     # z = np.sin(x * 6 * np.pi)
     # plot_surface_3d(x, y, z, save="test3.png")
     #
-    from metamodel import SupportVectorRegression
+    from metamodel import SupportVectorRegression, RandomForestRegression, \
+        FeedForwardNNRegression
     from benchmark import TestFunctionSet2DInputSpace
     from sampling import uniform_grid
     from sklearn.preprocessing import MinMaxScaler
     from algorithm import SSIFL
 
-    F2D = TestFunctionSet2DInputSpace()
 
+    def gif(model, name):
 
-    def ssifl_test(m_model, F_):
-        delta = 0.01
-        epsilon = 0.1
-        scaler = MinMaxScaler()
-        ssifl = SSIFL(F_, 2, m_model, delta, epsilon, scaler=scaler, tdmq=None,
-                      verbose=True, hopt=True, maxiter=-1, cumulative=True,
-                      importance='error',
-                      **{'clip': False, 'v': 2.0}, logging=1)
-        # ssifl.iterate_to_confidence()
-        grid = uniform_grid([[0] * 2, [1] * 2], 100, flatten=False)
-        flat = uniform_grid([[0] * 2, [1] * 2], 100, flatten=True)
+        F2D = TestFunctionSet2DInputSpace()
 
-        while ssifl.terminate is False:
-            ssifl.iterate()
-            iteration = ssifl._iteration
-            n_samples = ssifl._s_num
-            statistic = np.round(ssifl._log.statistic[-1] * 100, 2)
-            epsilon = ssifl.epsilon
-            confidence = np.round((1 - ssifl.delta) * 100, 2)
+        def ssifl_test(m_model, F_):
+            delta = 0.01
+            epsilon = 0.1
+            scaler = MinMaxScaler()
+            ssifl = SSIFL(F_, 2, m_model, delta, epsilon, scaler=scaler,
+                          tdmq=None,
+                          verbose=True, hopt=True, maxiter=-1, cumulative=True,
+                          importance='error',
+                          **{'clip': False, 'v': 4.0}, logging=1)
+            # ssifl.iterate_to_confidence()
+            grid = uniform_grid([[0] * 2, [1] * 2], 100, flatten=False)
+            flat = uniform_grid([[0] * 2, [1] * 2], 100, flatten=True)
 
-            title = (
-                    "Samples:".ljust(20) + f"{n_samples}<br>"
-                    + "Accuracy:".ljust(20) + f"{epsilon}<br>"
-                    + "Confidence:".ljust(20) + f"{statistic}%")
-            save_name_surf = f"ssifl_test3/img_surf_{str(iteration)}.pdf"
-            plot_3d_surface(grid[0], grid[1], scaler.inverse_transform(
-                ssifl.meta_model.predict(flat).reshape(-1, 1)).reshape(100,
-                                                                       100),
+            while ssifl.terminate is False:
+                ssifl.iterate()
+                iteration = ssifl._iteration
+                n_samples = ssifl._s_num
+                statistic = np.round(ssifl._log.statistic[-1] * 100, 2)
+                epsilon = ssifl.epsilon
+                confidence = np.round((1 - ssifl.delta) * 100, 2)
 
-                            save=save_name_surf,
-                            showscale=False,
-                            title=title)
+                title = (
+                        "Samples:".ljust(20) + f"{n_samples}<br>"
+                        + "Accuracy:".ljust(20) + f"{epsilon}<br>"
+                        + "Confidence:".ljust(20) + f"{statistic}%")
+                save_name_surf = f"{name}/img_surf_{str(iteration)}.pdf"
+                plot_3d_surface(grid[0], grid[1], scaler.inverse_transform(
+                    ssifl.meta_model.predict(flat).reshape(-1, 1)).reshape(100,
+                                                                           100),
 
-            # save_name_hist = f"ssifl_test3/img_hist_{str(iteration)}.png"
-            # plot_2d_contour(*ssifl._log[-1]['x_new'].T,
-            #                 save=save_name_hist,
-            #                 showscale=False,
-            #                 colourscale="Blues")
+                                save=save_name_surf,
+                                showscale=False,
+                                title=title)
 
-        return ssifl, scaler
+                # save_name_hist = f"ssifl_test3/img_hist_{str(iteration)}.png"
+                # plot_2d_contour(*ssifl._log[-1]['x_new'].T,
+                #                 save=save_name_hist,
+                #                 showscale=False,
+                #                 colourscale="Blues")
 
+            return ssifl, scaler
 
-    m_model1 = SupportVectorRegression(
-        static_params={'gamma': 400, 'epsilon': 1e-4})
-    F_1 = F2D[0]
-    ssifl_test(m_model1, F_1)
+        m_model1 = model
+        # static_params={'gamma': 400, 'epsilon': 1e-4})
+        F_1 = F2D[0]
+        ssifl_test(m_model1, F_1)
+
+    #
+    m_model1 = FeedForwardNNRegression()
+    gif(m_model1, "ffnn")
+    # _image_files_to_gif("./rfr_no_imp_cum", "here.gif")

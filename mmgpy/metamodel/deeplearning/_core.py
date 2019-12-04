@@ -716,6 +716,9 @@ class Trainer3:
                 x = x.to(self._device)
                 y = y.to(self._device)
 
+                print(x.size())
+                print(y.size())
+
                 # Forward pass
                 outputs = self._model(x.float())
                 self._loss = self._criterion(outputs, y.float())

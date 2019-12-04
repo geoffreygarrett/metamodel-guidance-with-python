@@ -40,14 +40,11 @@ Meta-model the target function
     from mmgpy.algorithm import EasySSIFL
     from mmgpy.plotting import make_ssifl_gif
 
-    # Define a callable target function.
-    rastrigin2D = Rastrigin(2)
-
-    # Choose learning algorithm.
+    # Instantiate the learning algorithm.
     ssifl = EasySSIFL(rastrigin2D)
 
-    # Iterate to desired accuracy and confidence.
-    results = ssifl.iterate_to(accuracy=0.1, confidence=0.95)
+    # Iterate to desired accuracy with desired confidence.
+    results = ssifl.iterate_to(accuracy=0.1, confidence=0.99)
 
     # Make gif of learning.
     make_ssifl_gif(results)
@@ -58,6 +55,10 @@ Meta-model the target function
 Optimise the meta-model
 #######################
 
+.. code-block:: python3
+
+    from mmgpy.optimise import pagmo_
+    from mmgpy.plotting import plot
 
 Analyse the surrogate optimum
 #############################
@@ -67,6 +68,7 @@ Analyse the surrogate optimum
    :caption: Sub-modules
    :hidden:
 
+   _src_docs/constructor_
    _src_docs/sampling
    _src_docs/dataset
    _src_docs/matlab_

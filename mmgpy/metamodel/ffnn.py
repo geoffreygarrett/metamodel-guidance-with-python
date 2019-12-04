@@ -222,8 +222,8 @@ class FeedForwardNNRegression(SurrogateModelBaseRegression):
 
         """
         hyperparameters = self.hyperparameters
-        hyperparameters["early_stopping"] = None
-        hyperparameters["num_epochs"] = 2000
+        # hyperparameters["early_stopping"] = None
+        # hyperparameters["num_epochs"] = 2000
         self._model, self._trainer = self._fit(x, y,
                                                model=self._model,
                                                **hyperparameters,
