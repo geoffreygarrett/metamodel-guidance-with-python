@@ -1,4 +1,4 @@
-from plotting._trace import *
+from ._trace import *
 import imageio
 
 
@@ -54,12 +54,12 @@ if __name__ == "__main__":
     # z = np.sin(x * 6 * np.pi)
     # plot_surface_3d(x, y, z, save="test3.png")
     #
-    from metamodel import SupportVectorRegression, RandomForestRegression, \
+    from mmgpy.metamodel import SupportVectorRegression, RandomForestRegression, \
         FeedForwardNNRegression
-    from benchmark import TestFunctionSet2DInputSpace
-    from sampling import uniform_grid
+    from mmgpy.benchmark import TestFunctionSet2DInputSpace
+    from mmgpy.sampling import uniform_grid
     from sklearn.preprocessing import MinMaxScaler
-    from algorithm import SSIFL
+    from mmgpy.algorithm import SSIFL
 
 
     def gif(model, name):
