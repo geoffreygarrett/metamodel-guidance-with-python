@@ -1,8 +1,8 @@
-from metamodel.ffnn import FeedForwardNNRegression
-from metamodel.rfr import RandomForestRegression
-from metamodel.svr import SupportVectorRegression
-from metamodel.gpr import GaussianProcessRegression
-from metamodel._base import SurrogateModelBaseRegression
+from .ffnn import FeedForwardNNRegression
+from .rfr import RandomForestRegression
+from .svr import SupportVectorRegression
+from .gpr import GaussianProcessRegression
+from ._base import SurrogateModelBaseRegression
 
 __all__ = [
     "SurrogateModelBaseRegression",
