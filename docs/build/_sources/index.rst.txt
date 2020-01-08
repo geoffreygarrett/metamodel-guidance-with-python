@@ -73,7 +73,7 @@ Analyse the surrogate optimum
    _src_docs/dataset
    _src_docs/matlab_
    _src_docs/metamodel
-   _src_docs/algorithm
+   _src_docs/algorithms
    _src_docs/optimise
    _src_docs/problems
    _src_docs/plotting

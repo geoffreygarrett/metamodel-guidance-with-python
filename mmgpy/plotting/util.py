@@ -9,7 +9,7 @@ rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
 rc('text', usetex=True)
 
 
-def plot2Ddemo(x, y, name=None, demo_lim=True):
+def plot2Dscatter(x, y, name=None, demo_lim=True):
     fig = plt.figure(figsize=(5, 5), dpi=300)
     ax = fig.add_subplot(111)
     plt.gcf().patch.set_facecolor('0.95')

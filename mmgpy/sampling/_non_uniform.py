@@ -72,8 +72,9 @@ def marginal_inverse_ecdf(p, x, kind='linear', single_x=False):
 
     for x_i, p_i in zip(x_sorted, p_sorted):
 
-        p_pdf = np.abs(p_i)
         x_cdf = x_i
+        p_pdf = p_i - np.min(p_i)
+
         # if x_i[0] > 0.0:
         x_cdf = np.concatenate(([0.0], x_cdf))
         p_pdf = np.concatenate(([0.0], p_pdf))
@@ -82,6 +83,7 @@ def marginal_inverse_ecdf(p, x, kind='linear', single_x=False):
         x_cdf = np.concatenate((x_cdf, [1.0]))
         p_pdf = np.concatenate((p_pdf, [0.0]))
 
+        # p_pdf -= np.min(p_pdf)
         p_cdf = np.cumsum(p_pdf)
         p_cdf /= np.max(p_cdf)
 
@@ -90,20 +92,12 @@ def marginal_inverse_ecdf(p, x, kind='linear', single_x=False):
         if p_cdf[-1] == p_cdf[-2]:
             p_cdf[-2] -= 1e-8
 
-        # print(p_cdf)
-        #
-        # # p_cdf = p_cdf[np.argsort(p_cdf)]
-        # # print("-" * 40)
-        # # print(x_cdf)
-        # # print(p_cdf)
-        # print(np.max(p_cdf))
-        # print(np.min(p_cdf))
-        # print(np.diff(p_cdf)[np.diff(p_cdf) < 0].shape)
-        # print(np.diff(x_cdf)[np.diff(p_cdf) < 0].shape)
-        # # print(np.unique(x_cdf).shape)
         m_i_ecdf.append(interp1d(x=p_cdf, y=x_cdf, kind=kind))
     m_i_ecdf = tuple(m_i_ecdf)
     return m_i_ecdf[0] if (len(m_i_ecdf) is 1 and single_x) else m_i_ecdf
+
+
+from copy import deepcopy
 
 
 class InterpolatedMarginalInverseECDF:
@@ -145,7 +139,7 @@ class InterpolatedMarginalInverseECDF:
             Dimension mismatch: 
             u.shape[-1] ({u.shape[-1]}) != x.shape[-1]({self.__x_dim})
             """)
-        result = u
+        result = deepcopy(u)
         # print(result)
         # Sample from each input marginal distribution.
         # try:
@@ -160,7 +154,7 @@ class InterpolatedMarginalInverseECDF:
                                                    arr=result.T[x_idx])
             # print(result)
         # except ValueError:
-
+        # assert np.all(result != u)
         return result
 
 

@@ -1,7 +1,7 @@
 import plotly
 import plotly.graph_objects as go
 
-from plotting._trisurf import *
+from ._trisurf import *
 from plotly.graph_objects import Figure
 from itertools import cycle
 

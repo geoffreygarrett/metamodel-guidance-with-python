@@ -3,8 +3,8 @@ from math import ceil
 from sklearn.base import TransformerMixin
 from sklearn.model_selection import train_test_split
 
-from mmgpy.utils import DynamicLogger
-from mmgpy.utils import PACCEvaluationLog
+from utils import DynamicLogger
+from utils import PACCEvaluationLog
 from formatting import print_pacc_header
 from formatting import print_pacc_iteration
 

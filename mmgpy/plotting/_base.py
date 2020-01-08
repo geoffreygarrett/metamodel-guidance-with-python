@@ -1,4 +1,4 @@
-from mmgpy.plotting._trace import *
+from ._trace import *
 import imageio
 
 
@@ -16,6 +16,7 @@ def _image_files_to_gif(folder, save_path):
 
 def plot_3d_surface(x, y, z, show=True, save=None, **kwargs):
     renderer = kwargs.pop('renderer', None)
+    layout_update = kwargs.pop('layout_update', {})
     title = kwargs.pop('title', None)
     trace_manager = TraceManager3D()
     trace_manager.layout.update(
@@ -23,7 +24,7 @@ def plot_3d_surface(x, y, z, show=True, save=None, **kwargs):
         scene=dict(
             xaxis_title='x1',
             yaxis_title='x2',
-            zaxis_title='f'))
+            zaxis_title='f'), **layout_update)
     trace_manager.add_surface(x, y, z, **kwargs)
     trace_manager.show(renderer) if show else None
     trace_manager.save(save) if save else None
@@ -31,11 +32,24 @@ def plot_3d_surface(x, y, z, show=True, save=None, **kwargs):
 
 def plot_2d_contour(x, y, show=True, save=True, **kwargs):
     renderer = kwargs.pop('renderer', None)
+    layout_update = kwargs.pop('layout_update', {})
     trace_manager = TraceManager2D()
     trace_manager.layout.update(scene=dict(
         xaxis_title='x1',
-        yaxis_title='x2'))
+        yaxis_title='x2'), **layout_update)
     trace_manager.add_contour(x, y, **kwargs)
+    trace_manager.show(renderer) if show else None
+    trace_manager.save(save) if save else None
+
+
+def plot_2d_scatter(x, y, show=True, save=True, **kwargs):
+    renderer = kwargs.pop('renderer', None)
+    layout_update = kwargs.pop('layout_update', {})
+    trace_manager = TraceManager2D()
+    trace_manager.layout.update(scene=dict(
+        xaxis_title='x1',
+        yaxis_title='x2'), **layout_update)
+    trace_manager.add_scatter(x, y, **kwargs)
     trace_manager.show(renderer) if show else None
     trace_manager.save(save) if save else None
 
@@ -54,7 +68,8 @@ if __name__ == "__main__":
     # z = np.sin(x * 6 * np.pi)
     # plot_surface_3d(x, y, z, save="test3.png")
     #
-    from mmgpy.metamodel import SupportVectorRegression, RandomForestRegression, \
+    from mmgpy.metamodel import SupportVectorRegression, \
+        RandomForestRegression, \
         FeedForwardNNRegression
     from mmgpy.benchmark import TestFunctionSet2DInputSpace
     from mmgpy.sampling import uniform_grid
@@ -112,6 +127,7 @@ if __name__ == "__main__":
         # static_params={'gamma': 400, 'epsilon': 1e-4})
         F_1 = F2D[0]
         ssifl_test(m_model1, F_1)
+
 
     #
     m_model1 = FeedForwardNNRegression()
