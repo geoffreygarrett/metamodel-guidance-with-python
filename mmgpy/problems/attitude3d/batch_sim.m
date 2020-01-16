@@ -29,9 +29,9 @@ function parallel_rapid_accel_sims_script_setup(mdl)
     currentFolder = pwd;
     tempDir = tempname;
     mkdir(tempDir);
+    evalin( 'base', 'run workerInit.m' )
     cd (tempDir);
     %Simulink.BlockDiagram.buildRapidAcceleratorTarget(mdl);
-    evalin( 'base', 'run workerInit.m' )
     oc = onCleanup(@() cd (currentFolder));
     
 end

@@ -23,15 +23,6 @@ Importing trained models into MATLAB
     :style: unsrt
 
 
-test
-====
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-
-   notebooks/MATLAB_GUIDE
-
 .. automodule:: matlab
    :members:
    :private-members:

@@ -8,8 +8,7 @@
 
 Metamodel Guidance with Python, or **mmgpy**, is a library to provide metamodelling (or surrogate modelling)
 capabilities of expensive black-box functions for the purpose of guidance optimisation, through the use of machine
-learning. It has been developed during my internship at Airbus Defence and Space in Toulouse under the supervision of
-Kristen Lagadec.
+learning. It has been developed during my internship at Airbus Defence and Space in Toulouse.
 
 Explore the target function
 ###########################
@@ -83,8 +82,7 @@ Analyse the surrogate optimum
    :maxdepth: 2
    :caption: Notebooks
 
-   _src_notebooks/HOPT - Sampling Importance
-   _src_notebooks/SSIFL training
+   _src_notebooks/MATLAB_GUIDE
 
 
 Indices and tables
